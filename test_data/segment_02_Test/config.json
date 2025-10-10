@@ -1,0 +1,38 @@
+{
+  "name": "Pilot",
+  "description": "Presence locking followed by omission test",
+  "segments": [
+    {
+      "name": "Lock",
+      "n_trials": 10,
+      "ratios": {
+        "p_O1": 1,
+        "p_O2": 0,
+        "p_omit": 0
+      }
+    },
+    {
+      "name": "Test",
+      "n_trials": 50,
+      "ratios": {
+        "p_O1": 0.9,
+        "p_O2": 0,
+        "p_omit": 0.1
+      }
+    }
+  ],
+  "stim_params": {
+    "s1_type": "pip_train",
+    "s2_type": "noise",
+    "s1_freq": 4000,
+    "s2_freq": 8000
+  },
+  "timing": {
+    "delay_ms": 500,
+    "iti_min_sec": 1,
+    "iti_max_sec": 2
+  },
+  "constraints": {
+    "max_omit_run": 2
+  }
+}
