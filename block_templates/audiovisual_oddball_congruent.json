@@ -1,0 +1,51 @@
+{
+  "block_type": "audiovisual_oddball",
+  "paradigm_type": "audiovisual",
+  "name": "Audiovisual Oddball (Congruent)",
+  "description": "Congruent audiovisual oddball from Xu et al.",
+  
+  "n_trials": 400,
+  "deviant_probability": 0.1,
+  
+  "standard": {
+    "name": "standard_av",
+    "audio": {
+      "stim_type": "tone",
+      "params": { "freq_hz": 800, "dur_ms": 100, "level_db": 60 }
+    },
+    "visual": {
+      "stim_type": "bar",
+      "params": { 
+        "orientation_deg": 18, 
+        "size_deg": [0.28, 1.2],
+        "position_deg": [0, 0],
+        "color": [204, 204, 204]
+      }
+    }
+  },
+  
+  "deviant": {
+    "name": "deviant_av",
+    "audio": {
+      "stim_type": "tone",
+      "params": { "freq_hz": 1600, "dur_ms": 100, "level_db": 60 }
+    },
+    "visual": {
+      "stim_type": "bar",
+      "params": { 
+        "orientation_deg": -18, 
+        "size_deg": [0.28, 1.2],
+        "position_deg": [0, 0],
+        "color": [204, 204, 204]
+      }
+    }
+  },
+  
+  "order_constraint": "no_consecutive_deviants",
+  
+  "timing": {
+    "isi_ms": 400,
+    "iti_min_sec": 1.0,
+    "iti_max_sec": 1.5
+  }
+}

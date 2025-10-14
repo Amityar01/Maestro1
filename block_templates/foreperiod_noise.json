@@ -21,7 +21,7 @@
   "outcome": {
     "stim_type": "noise",
     "params": {
-      "dur_ms": 50,
+      "dur_ms": 100,
       "level_db": 80
     }
   },
