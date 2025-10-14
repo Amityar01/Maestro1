@@ -1,0 +1,46 @@
+{
+  "block_type": "multi_oddball",
+  "name": "Multi-Oddball (Predetermined Inline)",
+  "description": "Fixed pattern using inline sequence array",
+  
+  "n_trials": 100,
+  
+  "standard": {
+    "name": "standard",
+    "stim_type": "tone",
+    "params": {
+      "freq_hz": 1000,
+      "dur_ms": 50,
+      "level_db": 60
+    }
+  },
+  
+  "deviants": [
+    {
+      "name": "deviant_freq",
+      "stim_type": "tone",
+      "params": {
+        "freq_hz": 2000,
+        "dur_ms": 50,
+        "level_db": 60
+      }
+    },
+    {
+      "name": "deviant_dur",
+      "stim_type": "tone",
+      "params": {
+        "freq_hz": 1000,
+        "dur_ms": 50,
+        "level_db": 0
+      }
+    }
+  ],
+  
+  "order": "predetermined",
+  "sequence": [1, 1, 1, 1, 2, 1, 1, 1, 1, 3],
+  
+  "timing": {
+    "iti_min_sec": 0.25,
+    "iti_max_sec": 0.25
+  }
+}

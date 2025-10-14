@@ -2,8 +2,10 @@
 function trial_list = add_timing(trial_list, timing_params)
 % ADD_TIMING - Add ITI and delay information to trials
 for k = 1:numel(trial_list)
-    % Delay (fixed in our design)
-    trial_list(k).delay_ms = timing_params.delay_ms;
+    % Delay (only if specified - used in foreperiod paradigm)
+    if isfield(timing_params, 'delay_ms')
+        trial_list(k).delay_ms = timing_params.delay_ms;
+    end
     
     % ITI (jittered)
     iti_range = timing_params.iti_max_sec - timing_params.iti_min_sec;

@@ -1,0 +1,34 @@
+{
+  "block_type": "foreperiod",
+  "name": "Auditory Foreperiod (Looming Cue -> Noise)",
+  "description": "A looming sound cue is followed by a foreperiod, then a noise outcome.",
+  
+  "n_trials": 200,
+  "omission_probability": 0.2,
+  
+  "cue": {
+    "stim_type": "looming_sound",
+    "params": {
+      "dur_ms": 1000,
+      "level_db_start": 40,
+      "level_db_end": 75,
+      "freq_min": 100,
+      "freq_max": 8000,
+      "n_tones": 50
+    }
+  },
+  
+  "outcome": {
+    "stim_type": "noise",
+    "params": {
+      "dur_ms": 50,
+      "level_db": 80
+    }
+  },
+  
+  "timing": {
+    "delay_ms": 0,
+    "iti_min_sec": 1.5,
+    "iti_max_sec": 2.5
+  }
+}

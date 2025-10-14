@@ -1,0 +1,50 @@
+{
+  "block_type": "cued_choice",
+  "name": "Frequency Prediction Task (Simple)",
+  "description": "A 4kHz cue predicts one of three outcomes with fixed probabilities.",
+  
+  "n_trials": 200,
+  
+  "cue": {
+    "stim_type": "tone",
+    "params": {
+      "freq_hz": 4000,
+      "dur_ms": 100,
+      "level_db": 60
+    }
+  },
+  
+  "outcomes": [
+    {
+      "name": "expected_high_freq",
+      "probability": 0.8,
+      "stim_type": "tone",
+      "params": {
+        "freq_hz": { "type": "random_uniform", "min": 7000, "max": 9000 },
+        "dur_ms": 100,
+        "level_db": 60
+      }
+    },
+    {
+      "name": "mismatch_low_freq",
+      "probability": 0.1,
+      "stim_type": "tone",
+      "params": {
+        "freq_hz": { "type": "random_uniform", "min": 1000, "max": 3000 },
+        "dur_ms": 100,
+        "level_db": 60
+      }
+    },
+    {
+      "name": "mismatch_omission",
+      "probability": 0.1,
+      "is_omission": true
+    }
+  ],
+  
+  "timing": {
+    "delay_ms": 500,
+    "iti_min_sec": 1.5,
+    "iti_max_sec": 2.5
+  }
+}
