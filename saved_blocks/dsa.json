@@ -1,0 +1,43 @@
+{
+  "block_type": "multi_oddball",
+  "name": "Multi-Oddball (Random Order)",
+  "description": "Two types of deviants with random ordering based on probabilities",
+  "n_trials": 100,
+  "standard": {
+    "name": "standard",
+    "stim_type": "tone",
+    "params": {
+      "freq_hz": 1000,
+      "dur_ms": 50,
+      "level_db": 60
+    },
+    "probability": 0.8
+  },
+  "deviants": [
+    {
+      "name": "deviant_freq",
+      "stim_type": "tone",
+      "params": {
+        "freq_hz": 2000,
+        "dur_ms": 50,
+        "level_db": 60
+      },
+      "probability": 0.1
+    },
+    {
+      "name": "deviant_dur",
+      "stim_type": "tone",
+      "params": {
+        "freq_hz": 1000,
+        "dur_ms": 50,
+        "level_db": 0
+      },
+      "probability": 0.1
+    }
+  ],
+  "order": "random",
+  "timing": {
+    "iti_min_sec": 0.25,
+    "iti_max_sec": 0.25
+  }
+}
