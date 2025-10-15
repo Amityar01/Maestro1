@@ -1,0 +1,44 @@
+{
+  "instance_id": "example_freq_oddball",
+  "builder_type": "oddball",
+  "builder_version": "1.0.0",
+  
+  "parameters": {
+    "n_trials": 200,
+    
+    "standard_stimulus": {
+      "generator": "tone",
+      "version": "1.0.0",
+      "parameters": {
+        "freq_hz": 1000,
+        "dur_ms": 50,
+        "level_db": 60,
+        "ramp_ms": 5
+      }
+    },
+    
+    "deviant_stimulus": {
+      "generator": "tone",
+      "version": "1.0.0",
+      "parameters": {
+        "freq_hz": 2000,
+        "dur_ms": 50,
+        "level_db": 60,
+        "ramp_ms": 5
+      }
+    },
+    
+    "deviant_probability": 0.15,
+    "order_constraint": "no_consecutive_deviants",
+    "iti_min_sec": 1.2,
+    "iti_max_sec": 1.8
+  },
+  
+  "metadata": {
+    "name": "Example Frequency Oddball",
+    "description": "1 kHz standard, 2 kHz deviant at 15%",
+    "created": "2025-01-15",
+    "created_by": "Maestro Development Team",
+    "notes": "Example instance for testing and demonstration"
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "$schema": "maestro-builder-v1",
+  "builder_type": "oddball",
+  "version": "1.0.0",
+  "description": "Standard/deviant oddball paradigm with configurable probability",
+  
+  "paradigm_category": "oddball",
+  
+  "required_inputs": {
+    "n_trials": {
+      "type": "integer",
+      "description": "Total number of trials to generate",
+      "constraints": {
+        "min": 1,
+        "max": 100000
+      }
+    },
+    "standard_stimulus": {
+      "type": "stimulus_specification",
+      "description": "Stimulus specification for standard trials"
+    },
+    "deviant_stimulus": {
+      "type": "stimulus_specification",
+      "description": "Stimulus specification for deviant trials"
+    },
+    "deviant_probability": {
+      "type": "float",
+      "description": "Probability of deviant trials (0-1)",
+      "constraints": {
+        "min": 0,
+        "max": 1
+      }
+    }
+  },
+  
+  "optional_inputs": {
+    "order_constraint": {
+      "type": "enum",
+      "default": "random",
+      "description": "Ordering constraint for trials",
+      "constraints": {
+        "options": ["random", "no_consecutive_deviants"]
+      }
+    },
+    "iti_min_sec": {
+      "type": "float",
+      "default": 1.0,
+      "description": "Minimum inter-trial interval",
+      "constraints": {
+        "min": 0
+      }
+    },
+    "iti_max_sec": {
+      "type": "float",
+      "default": 2.0,
+      "description": "Maximum inter-trial interval",
+      "constraints": {
+        "min": 0
+      }
+    }
+  },
+  
+  "output_specification": {
+    "description": "List of trials with standard or deviant stimuli",
+    "trial_structure": {
+      "trial_types": ["standard", "deviant"],
+      "metadata_fields": ["is_deviant", "trial_type"],
+      "presentation_count": "fixed (1 per trial)",
+      "timing_model": "jittered_iti"
+    }
+  },
+  
+  "implementation": {
+    "language": "matlab",
+    "function": "builders.oddball.build",
+    "file": "build.m",
+    "dependencies": []
+  },
+  
+  "examples": [
+    {
+      "name": "Frequency oddball",
+      "description": "1 kHz standard, 2 kHz deviant at 15%",
+      "instance": {
+        "builder_type": "oddball",
+        "parameters": {
+          "n_trials": 100,
+          "standard_stimulus": {
+            "generator": "tone",
+            "parameters": {"freq_hz": 1000, "dur_ms": 50, "level_db": 60}
+          },
+          "deviant_stimulus": {
+            "generator": "tone",
+            "parameters": {"freq_hz": 2000, "dur_ms": 50, "level_db": 60}
+          },
+          "deviant_probability": 0.15,
+          "order_constraint": "no_consecutive_deviants"
+        }
+      }
+    }
+  ],
+  
+  "metadata": {
+    "author": "Maestro Development Team",
+    "created": "2025-01-15",
+    "tags": ["oddball", "mismatch_negativity", "standard", "deviant"],
+    "references": [
+      "Näätänen et al. (2007). Mismatch negativity - A unique measure of sensory processing"
+    ]
+  }
+}
