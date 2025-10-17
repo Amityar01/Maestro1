@@ -32,6 +32,34 @@ classdef BlockEditor < handle
         PreviewButton
     end
 
+      properties
+        UIFigure
+        ParentApp % Keep reference to BlockManager if needed
+
+        % Builder info
+        builder_type
+        schema
+        context
+
+        % Current block struct (id, description, params, tags, created_by, etc.)
+        block
+
+        % UI components
+        Grid
+        SaveButton
+        CancelButton
+        PreviewButton
+
+        BlockIDField
+        DescriptionField
+        CreatedByField
+        TagsField
+
+        ParamsPanel
+        ParamControls % containers.Map of param_name -> control struct (fields: label, control, validators, etc.)
+
+        StatusLabel
+    end
     methods
         function app = BlockEditor(parent, builder_type, block, context)
             % CONSTRUCTOR
@@ -392,45 +420,23 @@ classdef BlockEditor < handle
             end
         end
 
-       function onArrayRemove(app, listbox)
-    % Handle both single-select (char/string) and multi-select (cell) cases
-    selectedValue = listbox.Value;
-
-    if isempty(selectedValue)
-        uialert(app.UIFigure, 'Select an item to remove.', 'Remove Item');
-        return;
-    end
-
-    % Normalize selection to a single char
-    if iscell(selectedValue)
-        selectedValue = selectedValue{1};  % take the first selection
-    end
-    selectedValue = char(string(selectedValue));
-
-    % Normalize Items to cellstr for strcmp
-    items = listbox.Items;
-    if ~iscell(items)
-        items = cellstr(items);  % supports string arrays too
-    end
-
-    selectedIndex = find(strcmp(items, selectedValue), 1);
-
-    if ~isempty(selectedIndex)
-        listbox.Items(selectedIndex) = [];
-        % Clear selection; for single-select it's '', for multi it's {}
-        try
-            listbox.Value = '';
-        catch
-            listbox.Value = {};
+        function onArrayRemove(app, listbox)
+            selectedValue = listbox.Value; % Returns cell array of selected strings
+            if isempty(selectedValue)
+                uialert(app.UIFigure, 'Select an item to remove.', 'Remove Item');
+                return;
+            end
+             % For single selection listbox, Value is a cell with one string
+             % Find the index of this string in Items
+            selectedIndex = find(strcmp(listbox.Items, selectedValue{1}), 1);
+            if ~isempty(selectedIndex)
+                listbox.Items(selectedIndex) = [];
+                listbox.Value = {}; % Clear selection
+            else
+                 gui.common.error_dialog.show_general_error(app.UIFigure, MException('App:Error','Selection mismatch error.'), 'Error');
+                 listbox.Value = {};
+            end
         end
-    else
-        gui.common.error_dialog.show_general_error( ...
-            app.UIFigure, ...
-            MException('App:Error','Selected item not found in list.'), ...
-            'Remove Item');
-        try, listbox.Value = ''; catch, listbox.Value = {}; end
-    end
-end
 
         function createStimulusField(app, parent, param_name, current_value, row)
              % Creates dropdown + button for stimulus spec (unchanged logic, stores struct)
