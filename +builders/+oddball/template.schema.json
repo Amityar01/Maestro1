@@ -3,17 +3,12 @@
   "builder_type": "oddball",
   "version": "1.0.0",
   "description": "Standard/deviant oddball paradigm with configurable probability",
-  
   "paradigm_category": "oddball",
-  
   "required_inputs": {
     "n_trials": {
       "type": "integer",
       "description": "Total number of trials to generate",
-      "constraints": {
-        "min": 1,
-        "max": 100000
-      }
+      "constraints": { "min": 1, "max": 100000 }
     },
     "standard_stimulus": {
       "type": "stimulus_specification",
@@ -26,84 +21,96 @@
     "deviant_probability": {
       "type": "float",
       "description": "Probability of deviant trials (0-1)",
-      "constraints": {
-        "min": 0,
-        "max": 1
-      },
-      "ui_hints": {
-        "display_name": "Deviant Prob (%)",
-        "unit": "%"
-      }
+      "constraints": { "min": 0, "max": 1 },
+      "ui_hints": { "display_name": "Deviant Prob (%)", "unit": "%" }
     }
   },
-  
   "optional_inputs": {
     "order_constraint": {
       "type": "enum",
       "default": "random",
       "description": "Ordering constraint for trials",
-      "constraints": {
-        "options": ["random", "no_consecutive_deviants"]
-      }
+      "constraints": { "options": ["random", "no_consecutive_deviants"] }
     },
     "iti_sec": {
       "type": "array",
       "element_type": "float",
-      "description": "Inter-trial interval. One value for fixed (e.g., 1500), two [Min, Max] for jitter.",
-      "default": [1000, 2000],
-      "ui_hints": {
-        "display_name": "ITI (ms)",
-        "unit": "ms"
-      }
+      "description": "Inter-trial interval. One value for fixed (e.g., 1.5), two [Min, Max] for jitter.",
+      "default": [ 1.0, 2.0 ],
+      "ui_hints": { "display_name": "ITI (ms)", "unit": "ms" }
     }
   },
-  
   "output_specification": {
     "description": "List of trials with standard or deviant stimuli",
     "trial_structure": {
       "trial_types": ["standard", "deviant"],
-      "metadata_fields": ["is_deviant", "trial_type"],
+      "metadata_fields": ["is_deviant", "kind"],
       "presentation_count": "fixed (1 per trial)",
       "timing_model": "jittered_iti"
     }
   },
-  
+  "preview_template": [
+    {
+      "type": "header",
+      "label": "--- Statistics ---"
+    },
+    {
+      "type": "statistic",
+      "label": "Deviants: {count} of {total} ({percentage}%)",
+      "calculation": "count_where_true",
+      "source_field": "metadata.is_deviant"
+    },
+    {
+      "type": "statistic",
+      "label": "ITI Range: {min} - {max} s",
+      "calculation": "min_max",
+      "source_field": "iti_sec",
+      "format": "%.3f"
+    },
+    {
+      "type": "statistic",
+      "label": "ITI Average: {mean} s",
+      "calculation": "mean",
+      "source_field": "iti_sec",
+      "format": "%.3f"
+    },
+    {
+        "type": "header",
+        "label": "--- Stimuli ---"
+    },
+    {
+        "type": "parameter",
+        "label": "Standard: {value.generator} ({value.parameters.freq_hz} Hz)",
+        "source_field": "standard_stimulus"
+    },
+    {
+        "type": "parameter",
+        "label": "Deviant: {value.generator} ({value.parameters.freq_hz} Hz)",
+        "source_field": "deviant_stimulus"
+    },
+    {
+      "type": "header",
+      "label": "--- Sequence Preview (first 40 trials) ---"
+    },
+    {
+      "type": "sequence",
+      "source_field": "metadata.is_deviant",
+      "length": 40,
+      "mapping": {
+        "true": "D",
+        "false": "S"
+      },
+      "chars_per_line": 20
+    }
+  ],
   "implementation": {
     "language": "matlab",
     "function": "builders.oddball.build",
-    "file": "build.m",
-    "dependencies": []
+    "file": "build.m"
   },
-  
-  "examples": [
-    {
-      "name": "Frequency oddball",
-      "description": "1 kHz standard, 2 kHz deviant at 15%",
-      "instance": {
-        "builder_type": "oddball",
-        "parameters": {
-          "n_trials": 100,
-          "standard_stimulus": {
-            "generator": "tone",
-            "parameters": {"freq_hz": 1000, "dur_ms": 50, "level_db": 60}
-          },
-          "deviant_stimulus": {
-            "generator": "tone",
-            "parameters": {"freq_hz": 2000, "dur_ms": 50, "level_db": 60}
-          },
-          "deviant_probability": 0.15,
-          "order_constraint": "no_consecutive_deviants"
-        }
-      }
-    }
-  ],
-  
   "metadata": {
     "author": "Maestro Development Team",
     "created": "2025-01-15",
-    "tags": ["oddball", "mismatch_negativity", "standard", "deviant"],
-    "references": [
-      "Näätänen et al. (2007). Mismatch negativity - A unique measure of sensory processing"
-    ]
+    "tags": ["oddball", "mismatch_negativity", "standard", "deviant"]
   }
 }
