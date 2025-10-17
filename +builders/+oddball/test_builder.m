@@ -2,7 +2,7 @@ function test_builder()
 % TEST_BUILDER - Test oddball builder
 %
 % Run this to verify the oddball builder works correctly
-
+clc
     fprintf('Testing oddball builder...\n');
     fprintf('════════════════════════════════════════════════\n\n');
     
@@ -41,7 +41,7 @@ function test_deviant_ratio()
     trial_list = builders.oddball.build(instance, context);
     
     % Count deviants
-    n_deviants = sum([trial_list.metadata.is_deviant]);
+    n_deviants = sum(arrayfun(@(t) t.metadata.is_deviant, trial_list));
     actual_p = n_deviants / length(trial_list);
     
     % Should be close to requested probability (within 5%)

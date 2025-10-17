@@ -1,144 +1,179 @@
 function trial_list = build(instance, context)
-% BUILD - Build oddball trial list
+% +builders/+oddball/build.m
+% Strict oddball builder, universal timeline output, no hidden defaults.
 %
-% This builder creates a standard/deviant oddball paradigm where frequent
-% "standard" stimuli are interspersed with rare "deviant" stimuli.
+% Required instance.parameters fields:
+%   n_trials                  integer >= 1
+%   standard_stimulus         struct with fields: generator, version, parameters
+%   deviant_stimulus          struct with fields: generator, version, parameters
+%   deviant_probability       scalar in [0,1]
+%   order_constraint          'none' or 'no_consecutive_deviants'
+%   iti_sec                   scalar (fixed ITI) or 1x2 [min max] for uniform jitter
 %
-% INPUTS:
-%   instance - struct, block instance with:
-%              .parameters.n_trials - number of trials
-%              .parameters.standard_stimulus - standard stim spec
-%              .parameters.deviant_stimulus - deviant stim spec
-%              .parameters.deviant_probability - proportion of deviants
-%              .parameters.order_constraint - (optional) ordering rules
-%              .parameters.iti_min_sec - (optional) min ITI
-%              .parameters.iti_max_sec - (optional) max ITI
-%
-%   context  - struct, runtime context with:
-%              .generators - available generators
-%              .rng_seed - (optional) random seed
-%
-% OUTPUTS:
-%   trial_list - array of trial structs with standardized format
+% Optional:
+%   playback                  struct, if provided will be attached at trial_list(1).engine.playback
 
-    % Extract parameters
-    params = instance.parameters;
-    n_trials = params.n_trials;
-    p_deviant = params.deviant_probability;
-    standard_stim = params.standard_stimulus;
-    deviant_stim = params.deviant_stimulus;
-    
-    % Handle optional parameters
-    if isfield(params, 'order_constraint')
-        order_constraint = params.order_constraint;
-    else
-        order_constraint = 'random';
-    end
-    
-    if isfield(params, 'iti_min_sec')
-        iti_min = params.iti_min_sec;
-    else
-        iti_min = 1.0;
-    end
-    
-    if isfield(params, 'iti_max_sec')
-        iti_max = params.iti_max_sec;
-    else
-        iti_max = 2.0;
-    end
-    
-    % Set random seed if provided
-    if isfield(context, 'rng_seed') && ~isempty(context.rng_seed)
-        rng(context.rng_seed);
-    end
-    
-    % Determine which trials are deviants
-    is_deviant = rand(n_trials, 1) < p_deviant;
-    
-    % Apply ordering constraints
-    switch order_constraint
-        case 'no_consecutive_deviants'
-            is_deviant = enforce_no_consecutive_deviants(is_deviant);
-        case 'random'
-            % No constraint, keep as is
-        otherwise
-            warning('builders:oddball:UnknownConstraint', ...
-                'Unknown order constraint: %s', order_constraint);
-    end
-    
-    % Generate ITI values (jittered)
-    iti_values = iti_min + (iti_max - iti_min) * rand(n_trials, 1);
-    
-    % Build trial list
-    trial_list = struct();
-    
-    for k = 1:n_trials
-        % Basic trial info
-        if isfield(instance, 'instance_id')
-            trial_list(k).trial_id = sprintf('%s_trial_%04d', ...
-                instance.instance_id, k);
-        else
-            trial_list(k).trial_id = sprintf('trial_%04d', k);
-        end
-        
-        trial_list(k).trial_num = k;
-        trial_list(k).iti_sec = iti_values(k);
-        
-        % Determine trial type and stimulus
-        if is_deviant(k)
-            trial_list(k).trial_type = 'deviant';
-            stim_spec = deviant_stim;
-        else
-            trial_list(k).trial_type = 'standard';
-            stim_spec = standard_stim;
-        end
-        
-        % Create single presentation at time 0
-        trial_list(k).presentations(1).presentation_id = ...
-            sprintf('%s_pres_1', trial_list(k).trial_id);
-        trial_list(k).presentations(1).stimulus_spec = stim_spec;
-        trial_list(k).presentations(1).onset_ms = 0;
-        trial_list(k).presentations(1).metadata = struct();
-        
-        % Trial metadata
-        trial_list(k).metadata = struct();
-        trial_list(k).metadata.is_deviant = is_deviant(k);
-        trial_list(k).metadata.trial_type = trial_list(k).trial_type;
-    end
-    
-    % Summary
-    n_deviants = sum(is_deviant);
-    actual_p = n_deviants / n_trials;
-    fprintf('Built oddball block: %d trials (%.1f%% deviants)\n', ...
-        n_trials, 100 * actual_p);
+% --------------------------
+% 1) Read and validate input
+% --------------------------
+P   = must_field(instance, 'parameters', 'instance');
+N   = must_num(  P, 'n_trials', 1, inf, true);
+STD = must_stim( P, 'standard_stimulus');
+DEV = must_stim( P, 'deviant_stimulus');
+pD  = must_num(  P, 'deviant_probability', 0, 1, false);
+
+order_constraint = must_field(P, 'order_constraint', 'parameters');
+order_constraint = lower(string(order_constraint));
+valid_constraints = ["none","no_consecutive_deviants"];
+assert(any(order_constraint == valid_constraints), ...
+    'oddball:order_constraint', 'order_constraint must be one of: %s', strjoin(valid_constraints, ', '));
+
+[iti_min, iti_max, use_jitter] = parse_iti_spec(resolve_iti(P));
+
+% ---------------------------------------
+% 2) Decide deviant positions for N trials
+% ---------------------------------------
+switch char(order_constraint)
+    case 'no_consecutive_deviants'
+        K = round(N * pD);
+        assert(K <= ceil(N/2), ...
+            'oddball:constraint', 'no_consecutive_deviants impossible with N=%d, p=%g', N, pD);
+        is_dev = place_nonconsecutive(N, K);
+    case 'none'
+        % Exact K to match requested ratio, without adjacency constraint
+        K = round(N * pD);
+        is_dev = exact_k_mask(N, K);
 end
 
-function is_deviant = enforce_no_consecutive_deviants(is_deviant)
-    % Shuffle trials to avoid consecutive deviants
-    
-    max_attempts = 1000;
-    
-    for attempt = 1:max_attempts
-        % Check if there are any consecutive deviants
-        has_consecutive = false;
-        for k = 1:length(is_deviant)-1
-            if is_deviant(k) && is_deviant(k+1)
-                has_consecutive = true;
-                break;
-            end
-        end
-        
-        % If no consecutive deviants, we're done
-        if ~has_consecutive
-            return;
-        end
-        
-        % Otherwise, shuffle and try again
-        is_deviant = is_deviant(randperm(length(is_deviant)));
+% ------------------------------------
+% 3) Build trial_list with presentations
+% ------------------------------------
+trial_list = repmat(struct( ...
+    'presentations', [], ...
+    'iti_sec', 0, ...
+    'metadata', struct() ...
+    ), 1, N);
+
+for k = 1:N
+    if is_dev(k), stim_spec = DEV; meta_kind = "deviant";
+    else,         stim_spec = STD; meta_kind = "standard";
     end
-    
-    % If we couldn't satisfy constraint after many attempts, warn
-    warning('builders:oddball:ConstraintNotSatisfied', ...
-        'Could not satisfy no_consecutive_deviants after %d attempts. ' + ...
-        'Try reducing deviant_probability.', max_attempts);
+
+    pres = struct();
+    pres.onset_ms      = 0;           % engine schedules at trial start
+    pres.stimulus_spec = stim_spec;   % generator, version, parameters
+    pres.engine        = struct();    % optional per-presentation overrides
+
+    trial_list(k).presentations = pres;
+
+    if use_jitter
+        trial_list(k).iti_sec = iti_min + (iti_max - iti_min) * rand();
+    else
+        trial_list(k).iti_sec = iti_min;
+    end
+
+    trial_list(k).metadata = struct( ...
+        'trial_index', k, ...
+        'kind', meta_kind, ...           % 'standard' or 'deviant'
+        'is_deviant', logical(is_dev(k)) ...
+        );
+end
+
+% --------------------------------------------------------
+% 4) Pass through builder-provided playback defaults (optional)
+% --------------------------------------------------------
+if isfield(P, 'playback') && ~isempty(P.playback) && isstruct(P.playback)
+    trial_list(1).engine.playback = P.playback;
+end
+
+% ----------
+% 5) Summary
+% ----------
+deviant_ratio = 100 * mean(is_dev);
+fprintf('Built oddball block: %d trials (%.1f%% deviants)\n', N, deviant_ratio);
+
+end
+
+% ======================
+% ===== Helpers ========
+% ======================
+
+function v = must_field(s, f, where)
+assert(isstruct(s) && isfield(s, f) && ~isempty(s.(f)), ...
+    'oddball:missingField', 'Missing field "%s" in %s', f, where);
+v = s.(f);
+end
+
+function x = resolve_iti(P)
+% Accept either:
+%   - iti_sec (scalar or [min max]), or
+%   - legacy pair iti_min_sec + iti_max_sec
+if isfield(P, 'iti_sec') && ~isempty(P.iti_sec)
+    x = P.iti_sec;
+elseif isfield(P, 'iti_min_sec') && isfield(P, 'iti_max_sec') ...
+        && ~isempty(P.iti_min_sec) && ~isempty(P.iti_max_sec)
+    x = [P.iti_min_sec, P.iti_max_sec];
+else
+    error('oddball:missingField', 'Missing ITI: provide "iti_sec" or "iti_min_sec"+"iti_max_sec".');
+end
+end
+
+function x = must_num(s, f, lo, hi, integer_required)
+x = must_field(s, f, 'parameters');
+validateattributes(x, {'numeric'}, {'nonempty','real'}, mfilename, f);
+assert(isscalar(x) || (isvector(x) && numel(x)==2), ...
+    'oddball:%s', sprintf('%s must be scalar or 1x2 numeric', f));
+if isscalar(x)
+    assert(x >= lo && x <= hi, 'oddball:%s', sprintf('%s out of range', f));
+    if integer_required
+        assert(x == floor(x), 'oddball:%s', sprintf('%s must be integer', f));
+    end
+else
+    assert(all(x >= lo) && all(x <= hi), 'oddball:%s', sprintf('%s elements out of range', f));
+end
+end
+
+function S = must_stim(P, name)
+S = must_field(P, name, 'parameters');
+must_field(S, 'generator', name);
+must_field(S, 'version',   name);
+must_field(S, 'parameters',name);
+end
+
+function [a, b, jitter] = parse_iti_spec(iti_spec)
+% Accept scalar ITI or 1x2 [min max]
+assert(isnumeric(iti_spec) && (isscalar(iti_spec) || numel(iti_spec)==2), ...
+    'oddball:iti', 'iti_sec must be scalar or 1x2 [min max]');
+if isscalar(iti_spec)
+    a = double(iti_spec); b = a; jitter = false;
+else
+    a = double(min(iti_spec)); b = double(max(iti_spec)); jitter = true;
+end
+assert(a >= 0 && b >= a, 'oddball:iti', 'Invalid iti_sec');
+end
+
+function mask = exact_k_mask(N, K)
+mask = false(1, N);
+if K <= 0, return; end
+idx = randperm(N, K);
+mask(idx) = true;
+end
+
+function is_dev = place_nonconsecutive(N, K)
+% Randomized placement with no adjacent deviants, exact K
+if K == 0
+    is_dev = false(1, N); return
+end
+avail = true(1, N);
+is_dev = false(1, N);
+for i = 1:K
+    idx = find(avail);
+    assert(~isempty(idx), 'oddball:placement', ...
+        'Could not satisfy no_consecutive_deviants with N=%d, K=%d', N, K);
+    pos = idx(randi(numel(idx)));
+    is_dev(pos) = true;
+    avail(pos) = false;
+    if pos > 1, avail(pos-1) = false; end
+    if pos < N, avail(pos+1) = false; end
+end
 end

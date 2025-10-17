@@ -29,6 +29,10 @@
       "constraints": {
         "min": 0,
         "max": 1
+      },
+      "ui_hints": {
+        "display_name": "Deviant Prob (%)",
+        "unit": "%"
       }
     }
   },
@@ -42,20 +46,14 @@
         "options": ["random", "no_consecutive_deviants"]
       }
     },
-    "iti_min_sec": {
-      "type": "float",
-      "default": 1.0,
-      "description": "Minimum inter-trial interval",
-      "constraints": {
-        "min": 0
-      }
-    },
-    "iti_max_sec": {
-      "type": "float",
-      "default": 2.0,
-      "description": "Maximum inter-trial interval",
-      "constraints": {
-        "min": 0
+    "iti_sec": {
+      "type": "array",
+      "element_type": "float",
+      "description": "Inter-trial interval. One value for fixed (e.g., 1500), two [Min, Max] for jitter.",
+      "default": [1000, 2000],
+      "ui_hints": {
+        "display_name": "ITI (ms)",
+        "unit": "ms"
       }
     }
   },
