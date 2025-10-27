@@ -1,0 +1,29 @@
+{
+    "template_info": {
+        "name": "Frequency Oddball (Tone)",
+        "description": "A simple auditory oddball task where a rare, high-frequency tone appears among common, low-frequency tones."
+    },
+    "builder": "build_oddball",
+    "trial_params": {
+        "n_trials": 250,
+        "deviant_probability": 0.15
+    },
+    "stimuli": {
+        "standard_stim": {
+            "name": "make_tone",
+            "params": {
+                "freq_hz": 1000,
+                "dur_ms": 150,
+                "level_db": 75
+            }
+        },
+        "deviant_stim": {
+            "name": "make_tone",
+            "params": {
+                "freq_hz": 1500,
+                "dur_ms": 150,
+                "level_db": 75
+            }
+        }
+    }
+}

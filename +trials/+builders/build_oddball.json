@@ -1,0 +1,32 @@
+{
+    "label": "Simple Oddball",
+    "description": "A paradigm with a repeating standard stimulus and a rare deviant stimulus.",
+    "parameters": {
+        "n_trials": {
+            "label": "Number of Trials",
+            "type": "integer",
+            "control": "spinner",
+            "default": 100,
+            "range": [1, 10000],
+            "step": 10,
+            "units": ""
+        },
+        "deviant_probability": {
+            "label": "Deviant Probability",
+            "type": "probability",
+            "control": "spinner",
+            "default": 0.2,
+            "range": [0.01, 1.0],
+            "step": 0.05,
+            "units": ""
+        }
+    },
+    "stimulus_slots": {
+        "standard_stim": {
+            "label": "Standard Stimulus"
+        },
+        "deviant_stim": {
+            "label": "Deviant Stimulus"
+        }
+    }
+}
