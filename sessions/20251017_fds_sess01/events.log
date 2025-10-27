@@ -1,0 +1,6 @@
+2025-10-17 16:56:27 [INFO] Session started: 20251017_fds_sess01
+2025-10-17 16:56:27 [INFO] Subject: fds
+2025-10-17 16:56:27 [INFO] Experimenter: fds
+2025-10-17 16:56:28 [INFO] Starting block 1
+2025-10-17 16:56:28 [ERROR] Missing field "n_trials" in parameters
+2025-10-17 16:56:28 [INFO] Session ended: completed

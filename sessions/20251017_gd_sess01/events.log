@@ -1,0 +1,6 @@
+2025-10-17 17:03:20 [INFO] Session started: 20251017_gd_sess01
+2025-10-17 17:03:20 [INFO] Subject: gd
+2025-10-17 17:03:20 [INFO] Experimenter: fg
+2025-10-17 17:03:20 [INFO] Starting block 1
+2025-10-17 17:03:20 [ERROR] Missing field "standard_stimulus" in parameters
+2025-10-17 17:03:21 [INFO] Session ended: completed

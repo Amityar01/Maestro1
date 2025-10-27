@@ -1,4 +1,4 @@
-classdef SequenceComposer < handle
+clcclassdef SequenceComposer < handle
     % SEQUENCECOMPOSER - Build experimental sequences from blocks
 
     properties
