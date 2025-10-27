@@ -1,0 +1,46 @@
+{
+  "$schema": "maestro-generator-v1",
+  "generator_type": "noise",
+  "version": "1.0.0",
+  "category": "audio",
+  "description": "Band-limited white noise",
+  "modality": "audio",
+  "render_type": "waveform",
+  "parameters": {
+    "dur_ms": {
+      "type": "float",
+      "required": true,
+      "description": "Duration of the noise burst",
+      "constraints": { "min": 1, "max": 10000 },
+      "unit": "ms"
+    },
+    "level_db": {
+      "type": "float",
+      "required": true,
+      "description": "Sound pressure level",
+      "constraints": { "min": 0, "max": 100 },
+      "unit": "dB SPL"
+    },
+    "cutoff_hz": {
+      "type": "float",
+      "required": false,
+      "default": 20000,
+      "description": "Low-pass filter cutoff frequency",
+      "constraints": { "min": 100, "max": 20000 },
+      "unit": "Hz"
+    },
+    "ramp_ms": {
+      "type": "float",
+      "required": false,
+      "default": 5,
+      "description": "Duration of onset/offset ramps",
+      "constraints": { "min": 0, "max": 100 },
+      "unit": "ms"
+    }
+  },
+  "implementation": {
+    "language": "matlab",
+    "function": "generators.audio.noise.generate",
+    "file": "generate.m"
+  }
+}
