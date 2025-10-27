@@ -1,0 +1,117 @@
+function launch_gui()
+    % Main entry point for the Maestro v2 GUI.
+    
+    clear; clc;
+    fprintf('Launching Maestro v2 GUI...\n');
+
+    % --- ROBUST PATH SETUP ---
+    try
+        script_path = fileparts(mfilename('fullpath'));
+        if ~strcmp(pwd, script_path)
+            cd(script_path); % Change to the script's directory
+        end
+        addpath(script_path); % Add the root directory to the path
+        rehash toolboxcache;  % Force MATLAB to recognize new packages
+        fprintf(' -> Path setup complete.\n');
+    catch ME
+        warning('Could not automatically set up path. Error: %s', ME.message);
+        return;
+    end
+
+    % --- Create Figure and Panels ---
+    fig = uifigure('Name', 'Maestro v2 - Modular Controller', 'Position', [100 100 1200 700]);
+    p1 = uipanel(fig, 'Title', 'Block Templates', 'Position', [20 20 250 660]);
+    p2 = uipanel(fig, 'Title', 'Parameter Editor', 'Position', [290 20 500 660]);
+    p3 = uipanel(fig, 'Title', 'Experiment Playlist', 'Position', [810 20 370 660]);
+    
+    % --- Panel 1: Template List ---
+    template_list = uilistbox(p1, 'Position', [10 10 230 610]);
+
+    % --- Panel 2: Parameter Editor ---
+    editor_panel = uipanel(p2, 'BorderType', 'none', 'Position', [10 70 480 550], 'Scrollable', 'on');
+    uilabel(p2, 'Text', 'Instance Name:', 'Position', [15 40 100 22], 'FontWeight', 'bold');
+    instance_name_field = uieditfield(p2, 'text', 'Position', [120 40 250 22]);
+    save_button = uibutton(p2, 'Text', 'Save to Playlist', 'Position', [120 10 250 22], 'BackgroundColor', [0.1 0.5 0.8], 'FontColor', 'white');
+    
+    % --- Panel 3: Playlist ---
+    playlist_list = uilistbox(p3, 'Position', [10 70 350 550]);
+    move_up_btn = uibutton(p3, 'Text', 'Up', 'Position', [10 40 80 22]);
+    move_down_btn = uibutton(p3, 'Text', 'Down', 'Position', [100 40 80 22]);
+    remove_btn = uibutton(p3, 'Text', 'Remove', 'Position', [190 40 80 22]);
+    run_experiment_btn = uibutton(p3, 'Text', 'RUN EXPERIMENT', 'Position', [10 10 350 22], 'BackgroundColor', [0.2 0.8 0.2], 'FontColor', 'white', 'FontWeight', 'bold');
+
+    % --- Discover All Components ---
+    fprintf('Discovering components...\n');
+    handles = struct();
+    handles.fig = fig;
+    handles.editor_panel = editor_panel;
+    handles.instance_name_field = instance_name_field;
+    handles.playlist_list = playlist_list;
+    
+    % --- CORRECTED DISCOVERY CALLS ---
+    handles.builders = gui_helpers.discovery.find_components('+trials/+builders');
+    handles.stimuli = gui_helpers.discovery.find_components('+stim');
+    
+    [template_names, template_files] = gui_helpers.discovery.find_templates('block_templates');
+    template_list.Items = template_names;
+    template_list.UserData = struct('files', {template_files});
+    
+    fprintf(' -> Found %d templates, %d builders, %d stimuli.\n', ...
+        numel(template_names), handles.builders.Count, handles.stimuli.Count);
+    
+    fig.UserData = handles;
+    
+    % --- Assign Callbacks ---
+    template_list.ValueChangedFcn = @(src, ~) gui_helpers.dynamic_builder.build_ui_for_template(fig, src);
+    save_button.ButtonPushedFcn = @(src, ~) gui_helpers.config_manager.save_to_playlist(fig);
+    
+    % Add playlist management callbacks
+    move_up_btn.ButtonPushedFcn = @(src, ~) manage_playlist('up', fig);
+    move_down_btn.ButtonPushedFcn = @(src, ~) manage_playlist('down', fig);
+    remove_btn.ButtonPushedFcn = @(src, ~) manage_playlist('remove', fig);
+
+    fprintf('✓ GUI Ready.\n');
+end
+
+function manage_playlist(action, fig)
+    % Handles moving items up/down or removing them from the playlist.
+    handles = fig.UserData;
+    listbox = handles.playlist_list;
+    selected_item = listbox.Value;
+    if isempty(selected_item), return; end
+    
+    idx = find(strcmp(listbox.Items, selected_item));
+    
+    switch action
+        case 'remove'
+            listbox.Items(idx) = [];
+            if ~isempty(listbox.UserData)
+                listbox.UserData(idx) = [];
+            end
+        case 'up'
+            if idx > 1
+                items = listbox.Items;
+                data = listbox.UserData;
+                items([idx-1, idx]) = items([idx, idx-1]);
+                if ~isempty(data)
+                    data([idx-1, idx]) = data([idx, idx-1]);
+                    listbox.UserData = data;
+                end
+                listbox.Items = items;
+                listbox.Value = selected_item;
+            end
+        case 'down'
+            if idx < numel(listbox.Items)
+                items = listbox.Items;
+                data = listbox.UserData;
+                items([idx, idx+1]) = items([idx+1, idx]);
+                 if ~isempty(data)
+                    data([idx, idx+1]) = data([idx+1, idx]);
+                    listbox.UserData = data;
+                end
+                listbox.Items = items;
+                listbox.Value = selected_item;
+            end
+    end
+end
+

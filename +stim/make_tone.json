@@ -1,0 +1,32 @@
+{
+    "label": "Pure Tone",
+    "description": "A simple sinusoidal tone at a specific frequency.",
+    "parameters": {
+        "freq_hz": {
+            "label": "Frequency",
+            "type": "frequency",
+            "control": "spinner",
+            "default": 1000,
+            "range": [20, 22000],
+            "step": 100,
+            "units": "Hz"
+        },
+        "dur_ms": {
+            "label": "Duration",
+            "type": "duration",
+            "control": "numeric_edit",
+            "default": 200,
+            "range": [1, 10000],
+            "units": "ms"
+        },
+        "level_db": {
+            "label": "Sound Level",
+            "type": "level",
+            "control": "spinner",
+            "default": 80,
+            "range": [0, 100],
+            "step": 5,
+            "units": "dB"
+        }
+    }
+}
