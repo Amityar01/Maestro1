@@ -1,0 +1,50 @@
+{
+  "examples": [
+    {
+      "name": "Standard tone",
+      "description": "1 kHz tone at 60 dB for 50 ms",
+      "stimulus_spec": {
+        "generator": "tone",
+        "version": "1.0.0",
+        "parameters": {
+          "freq_hz": 1000,
+          "dur_ms": 50,
+          "level_db": 60,
+          "ramp_ms": 5
+        }
+      }
+    },
+    {
+      "name": "High tone",
+      "description": "8 kHz deviant for oddball",
+      "stimulus_spec": {
+        "generator": "tone",
+        "version": "1.0.0",
+        "parameters": {
+          "freq_hz": 8000,
+          "dur_ms": 100,
+          "level_db": 65,
+          "ramp_ms": 5
+        }
+      }
+    },
+    {
+      "name": "Randomized frequency",
+      "description": "Tone with random frequency between 1-2 kHz",
+      "stimulus_spec": {
+        "generator": "tone",
+        "version": "1.0.0",
+        "parameters": {
+          "freq_hz": {
+            "type": "random_uniform",
+            "min": 1000,
+            "max": 2000
+          },
+          "dur_ms": 50,
+          "level_db": 60,
+          "ramp_ms": 5
+        }
+      }
+    }
+  ]
+}

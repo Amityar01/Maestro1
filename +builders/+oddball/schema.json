@@ -1,0 +1,38 @@
+{
+  "schema": "maestro.builder",
+  "version": "1.0",
+  "builder_type": "oddball",
+  "parameters": {
+    "required": [
+      "n_trials",
+      "standard_stimulus",
+      "deviant_stimulus",
+      "deviant_probability",
+      "order_constraint"
+    ],
+    "aliases": {
+      "num_trials": "n_trials",
+      "n_total": "n_trials",
+      "trial_count": "n_trials",
+      "trials": "n_trials",
+      "p_deviant": "deviant_probability",
+      "dev_frac": "deviant_probability",
+      "deviant_prob": "deviant_probability",
+      "std": "standard_stimulus",
+      "dev": "deviant_stimulus"
+    },
+    "defaults": {
+      "deviant_probability": 0.2,
+      "order_constraint": "none"
+    },
+    "enums": {
+      "order_constraint": ["none", "no_consecutive_deviants"]
+    },
+    "types": {
+      "n_trials": "scalar_numeric",
+      "deviant_probability": "scalar_numeric",
+      "standard_stimulus": "stimulus_spec",
+      "deviant_stimulus": "stimulus_spec"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "maestro-engine-v1",
+  "engine_type": "audio_only",
+  "version": "1.0.0",
+  "description": "Audio-only playback engine using DAQ hardware",
+  
+  "supported_modalities": ["audio"],
+  
+  "capabilities": {
+    "simultaneous_presentations": true,
+    "precise_timing": true,
+    "response_collection": true,
+    "hardware_triggering": true
+  },
+  
+  "configuration": {
+    "required": {
+      "sampling_rate_hz": {
+        "type": "integer",
+        "description": "DAQ sampling rate",
+        "constraints": {"min": 8000, "max": 500000},
+        "default": 192000
+      }
+    },
+    "optional": {
+      "vendor": {
+        "type": "string",
+        "description": "DAQ vendor (ni, adi, etc.)",
+        "default": "ni"
+      },
+      "device_id": {
+        "type": "string",
+        "description": "DAQ device ID",
+        "default": "Dev1"
+      },
+      "audio_channels": {
+        "type": "array",
+        "description": "Analog output channel IDs",
+        "default": ["ao0", "ao1"]
+      },
+      "trigger_channel": {
+        "type": "string",
+        "description": "Digital output channel for triggers",
+        "default": null
+      }
+    }
+  },
+  
+  "implementation": {
+    "language": "matlab",
+    "function": "engines.audio_only.execute",
+    "file": "execute.m",
+    "dependencies": ["Data Acquisition Toolbox"]
+  },
+  
+  "output_specification": {
+    "trial_data": {
+      "timing": ["start_time", "duration_sec"],
+      "responses": ["key", "reaction_time_sec"],
+      "metadata": ["trial_index", "block_index"]
+    }
+  },
+  
+  "metadata": {
+    "author": "Maestro Development Team",
+    "created": "2025-01-15",
+    "tags": ["audio", "daq", "hardware", "triggering"],
+    "requirements": ["Data Acquisition Toolbox"]
+  }
+}

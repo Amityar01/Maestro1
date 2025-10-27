@@ -1,0 +1,117 @@
+{
+  "$schema": "maestro-generator-v1",
+  "generator_type": "tone",
+  "version": "1.0.0",
+  "category": "audio",
+  "description": "Pure sinusoidal tone with half-cosine ramps",
+  
+  "modality": "audio",
+  "render_type": "waveform",
+  
+  "compatible_engines": ["audio_only", "audiovisual"],
+  
+  "parameters": {
+    "freq_hz": {
+      "type": "float",
+      "required": true,
+      "description": "Frequency of the tone",
+      "constraints": {
+        "min": 20,
+        "max": 20000
+      },
+      "randomizable": true,
+      "unit": "Hz",
+      "ui_hints": {
+        "widget": "slider",
+        "display_name": "Frequency"
+      }
+    },
+    "dur_ms": {
+      "type": "float",
+      "required": true,
+      "description": "Duration of the tone",
+      "constraints": {
+        "min": 1,
+        "max": 10000
+      },
+      "unit": "ms",
+      "ui_hints": {
+        "widget": "spinner"
+      }
+    },
+    "level_db": {
+      "type": "float",
+      "required": true,
+      "description": "Sound pressure level",
+      "constraints": {
+        "min": 0,
+        "max": 100
+      },
+      "randomizable": true,
+      "unit": "dB SPL",
+      "ui_hints": {
+        "widget": "slider",
+        "display_name": "Level"
+      }
+    },
+    "ramp_ms": {
+      "type": "float",
+      "required": false,
+      "default": 5,
+      "description": "Duration of onset/offset ramps",
+      "constraints": {
+        "min": 0,
+        "max": 100
+      },
+      "unit": "ms"
+    }
+  },
+  
+  "output_specification": {
+    "description": "Audio waveform with specified frequency and level",
+    "structure": {
+      "modality": "audio",
+      "render_type": "waveform",
+      "data": "column vector of audio samples",
+      "duration_ms": "matches dur_ms parameter",
+      "metadata": "copy of input parameters"
+    }
+  },
+  
+  "implementation": {
+    "language": "matlab",
+    "function": "generators.audio.tone.generate",
+    "file": "generate.m",
+    "dependencies": []
+  },
+  
+  "examples": [
+    {
+      "name": "1 kHz tone",
+      "description": "Standard 1 kHz calibration tone",
+      "parameters": {
+        "freq_hz": 1000,
+        "dur_ms": 50,
+        "level_db": 60,
+        "ramp_ms": 5
+      }
+    },
+    {
+      "name": "High frequency",
+      "description": "8 kHz tone for oddball paradigm",
+      "parameters": {
+        "freq_hz": 8000,
+        "dur_ms": 100,
+        "level_db": 65,
+        "ramp_ms": 5
+      }
+    }
+  ],
+  
+  "metadata": {
+    "author": "Maestro Development Team",
+    "created": "2025-01-15",
+    "modified": "2025-01-15",
+    "tags": ["audio", "tone", "pure_tone", "calibration"]
+  }
+}
