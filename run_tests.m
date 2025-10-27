@@ -108,11 +108,21 @@ function results = run_tests(varargin)
 
         for i = 1:length(failed_tests)
             fprintf('  %d. %s\n', i, failed_tests(i).Name);
-            if ~isempty(failed_tests(i).Details.DiagnosticRecord)
-                disp_record = failed_tests(i).Details.DiagnosticRecord;
-                if ~isempty(disp_record)
-                    fprintf('     %s\n', disp_record(1).Event);
+
+            % Try to get diagnostic information (compatible with different MATLAB versions)
+            try
+                if isfield(failed_tests(i).Details, 'DiagnosticRecord')
+                    disp_record = failed_tests(i).Details.DiagnosticRecord;
+                    if ~isempty(disp_record)
+                        fprintf('     %s\n', disp_record(1).Event);
+                    end
+                elseif isfield(failed_tests(i), 'Details')
+                    % Some MATLAB versions have different structure
+                    fprintf('     See test output above for details\n');
                 end
+            catch
+                % If we can't access diagnostics, just skip it
+                fprintf('     See test output above for details\n');
             end
         end
         fprintf('\n');

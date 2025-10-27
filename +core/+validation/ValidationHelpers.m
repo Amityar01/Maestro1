@@ -24,8 +24,20 @@ classdef ValidationHelpers
             missing = {};
             for i = 1:length(required_fields)
                 field = required_fields{i};
-                if ~isfield(structure, field) || isempty(structure.(field))
+                % Check if field exists
+                if ~isfield(structure, field)
                     missing{end+1} = field; %#ok<AGROW>
+                else
+                    % Field exists, check if it's empty
+                    try
+                        field_value = structure.(field);
+                        if isempty(field_value)
+                            missing{end+1} = field; %#ok<AGROW>
+                        end
+                    catch
+                        % If we can't access it, consider it missing
+                        missing{end+1} = field; %#ok<AGROW>
+                    end
                 end
             end
 
