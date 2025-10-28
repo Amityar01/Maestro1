@@ -62,7 +62,7 @@ function launch_gui()
     fig.UserData = handles;
     
     % --- Assign Callbacks ---
-    template_list.ValueChangedFcn = @(src, ~) gui_helpers.dynamic_builder.build_ui_for_template(fig, src);
+    template_list.ValueChangedFcn = @(src, ~) gui_helpers.dynamic_builder.templateSelectedCallback(fig, src);
     save_button.ButtonPushedFcn = @(src, ~) gui_helpers.config_manager.save_to_playlist(fig);
     
     % Add playlist management callbacks
