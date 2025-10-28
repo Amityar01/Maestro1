@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/stimuli/cloud.async",
+  "title": "Asynchronous Pip Cloud Stimulus",
+  "description": "Stochastic cloud of brief tone pips with controlled density and frequency distribution",
+  "version": "1.0.0",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../core/token_common.schema.json"
+    }
+  ],
+  "required": ["pip_spec", "freq_range_hz", "density_per_s"],
+  "properties": {
+    "type": {
+      "const": "cloud.async"
+    },
+    "pip_spec": {
+      "type": "object",
+      "description": "Specification for individual pips",
+      "required": ["tone_duration_ms", "ramp_ms"],
+      "properties": {
+        "tone_duration_ms": {
+          "type": "number",
+          "minimum": 0.1,
+          "description": "Duration of each pip (excluding ramps)"
+        },
+        "ramp_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Attack and release ramp duration for each pip"
+        }
+      },
+      "additionalProperties": false
+    },
+    "freq_range_hz": {
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": {
+        "min": {
+          "type": "number",
+          "minimum": 20,
+          "description": "Minimum pip frequency in Hz"
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum pip frequency in Hz"
+        }
+      },
+      "additionalProperties": false
+    },
+    "density_per_s": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Average number of pips per second"
+    },
+    "level_distribution": {
+      "type": "object",
+      "description": "How pip levels vary",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["fixed", "uniform_jitter"],
+          "default": "fixed"
+        },
+        "jitter_db": {
+          "type": "number",
+          "minimum": 0,
+          "description": "±dB jitter range if mode=uniform_jitter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "min_separation_semitones": {
+      "type": "number",
+      "minimum": 0,
+      "default": 1,
+      "description": "Minimum frequency separation between simultaneous pips in semitones"
+    },
+    "seed_scope": {
+      "type": "string",
+      "enum": ["per_token", "per_trial", "per_block"],
+      "default": "per_token",
+      "description": "When to reseed pip cloud generation"
+    },
+    "budget": {
+      "type": "object",
+      "description": "Resource limits for generation",
+      "properties": {
+        "max_pips": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10000,
+          "description": "Maximum number of pips per token"
+        },
+        "max_memory_mb": {
+          "type": "number",
+          "minimum": 1,
+          "default": 100,
+          "description": "Memory budget for generation"
+        }
+      }
+    }
+  },
+  "ui_hints": {
+    "label": "Pip Cloud",
+    "icon": "cloud",
+    "description": "Stochastic cloud of brief tone pips",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["freq_range_hz", "density_per_s", "duration_ms", "level"]
+      },
+      {
+        "name": "Pip Properties",
+        "fields": ["pip_spec", "level_distribution", "min_separation_semitones"]
+      },
+      {
+        "name": "Advanced",
+        "fields": ["seed_scope", "budget", "envelope"],
+        "collapsed_by_default": true
+      }
+    ],
+    "preview_template": "Pip cloud: {density_per_s}/s, {freq_range_hz.min}-{freq_range_hz.max} Hz, {duration_ms} ms"
+  }
+}

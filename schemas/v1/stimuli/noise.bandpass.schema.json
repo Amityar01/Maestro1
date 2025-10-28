@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/stimuli/noise.bandpass",
+  "title": "Bandpass Noise Stimulus",
+  "description": "Filtered noise with specified bandwidth",
+  "version": "1.0.0",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../core/token_common.schema.json"
+    }
+  ],
+  "required": ["center_hz"],
+  "properties": {
+    "type": {
+      "const": "noise.bandpass"
+    },
+    "center_hz": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Center frequency in Hz"
+    },
+    "bandwidth_hz": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Bandwidth in Hz (mutually exclusive with q)"
+    },
+    "q": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Quality factor (center_hz / bandwidth_hz, mutually exclusive with bandwidth_hz)"
+    },
+    "filter_shape": {
+      "type": "string",
+      "enum": ["butterworth", "chebyshev", "gaussian"],
+      "default": "butterworth",
+      "description": "Filter shape/type"
+    },
+    "filter_order": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 4,
+      "description": "Filter order (higher = steeper rolloff)"
+    }
+  },
+  "oneOf": [
+    {"required": ["bandwidth_hz"]},
+    {"required": ["q"]}
+  ],
+  "ui_hints": {
+    "label": "Bandpass Noise",
+    "icon": "waveform-noise",
+    "description": "Filtered noise with specified center frequency and bandwidth",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["center_hz", "bandwidth_hz", "duration_ms", "level"]
+      },
+      {
+        "name": "Advanced",
+        "fields": ["q", "filter_shape", "filter_order", "envelope"],
+        "collapsed_by_default": true
+      }
+    ],
+    "field_widgets": {
+      "center_hz": {
+        "widget": "spinner",
+        "min": 20,
+        "max": 22000,
+        "step": 10,
+        "units": "Hz",
+        "log_scale": true
+      },
+      "bandwidth_hz": {
+        "widget": "spinner",
+        "min": 10,
+        "max": 20000,
+        "step": 10,
+        "units": "Hz"
+      },
+      "q": {
+        "widget": "spinner",
+        "min": 0.1,
+        "max": 100,
+        "step": 0.1
+      }
+    },
+    "preview_template": "{center_hz} Hz ±{bandwidth_hz} Hz noise, {duration_ms} ms"
+  }
+}

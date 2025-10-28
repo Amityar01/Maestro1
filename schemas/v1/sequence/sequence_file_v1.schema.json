@@ -1,0 +1,295 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/sequence/sequence_file_v1",
+  "title": "SequenceFile v1 Specification",
+  "description": "Complete specification for compiled experiment sequence files (HDF5 or NPZ format)",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["format_version", "container_type", "datasets", "manifest"],
+  "properties": {
+    "format_version": {
+      "const": "1.0.0",
+      "description": "SequenceFile format version"
+    },
+    "container_type": {
+      "type": "string",
+      "enum": ["hdf5", "npz"],
+      "description": "File container format"
+    },
+    "datasets": {
+      "type": "object",
+      "description": "Required datasets in the container",
+      "required": ["audio", "ttl", "events", "trial_table", "element_table"],
+      "properties": {
+        "audio": {
+          "type": "object",
+          "required": ["dtype", "shape", "description"],
+          "properties": {
+            "dtype": {
+              "const": "float32"
+            },
+            "shape": {
+              "type": "array",
+              "description": "[samples, channels]",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "description": {
+              "const": "Audio waveform data"
+            },
+            "chunking": {
+              "type": "object",
+              "description": "Optional chunking for large files",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "chunk_size_samples": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "ttl": {
+          "type": "object",
+          "required": ["dtype", "shape", "description"],
+          "properties": {
+            "dtype": {
+              "const": "uint8"
+            },
+            "shape": {
+              "type": "array",
+              "description": "[samples], 1=TTL high, 0=TTL low",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 1,
+              "maxItems": 1
+            },
+            "description": {
+              "const": "TTL signal track"
+            }
+          }
+        },
+        "events": {
+          "type": "object",
+          "required": ["columns", "description"],
+          "properties": {
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "dtype"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "event_type",
+                      "sample_index",
+                      "trial_id",
+                      "element_id",
+                      "timestamp_ms"
+                    ]
+                  },
+                  "dtype": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": {
+              "const": "Event log with TTL edges and engine lifecycle events"
+            },
+            "event_types": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "playback_start",
+                  "stim_onset_ttl",
+                  "playback_end",
+                  "block_start",
+                  "block_end",
+                  "manual_gate"
+                ]
+              }
+            }
+          }
+        },
+        "trial_table": {
+          "type": "object",
+          "required": ["columns", "description"],
+          "properties": {
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "dtype"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "trial_id",
+                      "trial_index",
+                      "block_name",
+                      "label",
+                      "code",
+                      "stimulus_ref",
+                      "stimulus_hash",
+                      "scheduled_onset_ms",
+                      "actual_onset_ms",
+                      "iti_ms",
+                      "rng_streams_used",
+                      "notes"
+                    ]
+                  },
+                  "dtype": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": {
+              "const": "One row per trial with metadata and timing"
+            }
+          }
+        },
+        "element_table": {
+          "type": "object",
+          "required": ["columns", "description"],
+          "properties": {
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "dtype"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "element_id",
+                      "trial_id",
+                      "trial_index",
+                      "element_index",
+                      "role",
+                      "symbol",
+                      "stimulus_ref",
+                      "stimulus_hash",
+                      "scheduled_onset_ms",
+                      "actual_onset_ms",
+                      "realized_params",
+                      "is_silence"
+                    ]
+                  },
+                  "dtype": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": {
+              "const": "One row per element (scheduled stimulus) with realized parameters"
+            }
+          }
+        }
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "description": "Complete provenance and metadata",
+      "required": [
+        "fs_hz",
+        "schema_version",
+        "compilation_timestamp",
+        "capability_descriptor"
+      ],
+      "properties": {
+        "fs_hz": {
+          "type": "integer",
+          "description": "Sample rate in Hz"
+        },
+        "schema_version": {
+          "type": "string",
+          "description": "Schema version used for compilation"
+        },
+        "compilation_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of compilation"
+        },
+        "capability_descriptor": {
+          "$ref": "../capabilities/engine_capabilities.schema.json",
+          "description": "Engine capabilities used for compilation"
+        },
+        "paradigm_schemas": {
+          "type": "object",
+          "description": "Full paradigm schemas used",
+          "additionalProperties": true
+        },
+        "stimulus_schemas": {
+          "type": "object",
+          "description": "Full stimulus schemas used",
+          "additionalProperties": true
+        },
+        "seeds": {
+          "type": "object",
+          "description": "All RNG seeds used",
+          "properties": {
+            "master_seed": {
+              "type": "integer"
+            },
+            "stream_seeds": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "hashes": {
+          "type": "object",
+          "description": "Content hashes for verification",
+          "properties": {
+            "audio_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "ttl_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "manifest_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "experimenter_metadata": {
+          "type": "object",
+          "properties": {
+            "experimenter": {
+              "type": "string"
+            },
+            "subject_id": {
+              "type": "string"
+            },
+            "rig_id": {
+              "type": "string"
+            },
+            "calibration_file": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

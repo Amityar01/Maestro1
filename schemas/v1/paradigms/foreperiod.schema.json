@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/paradigms/foreperiod",
+  "title": "Foreperiod Paradigm",
+  "description": "Cue stimulus followed by outcome after variable foreperiod",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["paradigm_type", "cue", "outcomes", "foreperiod_default", "iti"],
+  "properties": {
+    "paradigm_type": {
+      "const": "foreperiod"
+    },
+    "cue": {
+      "type": "object",
+      "required": ["stimulus_ref"],
+      "properties": {
+        "stimulus_ref": {
+          "type": "string",
+          "description": "Reference to cue stimulus"
+        },
+        "label": {
+          "type": "string",
+          "default": "cue",
+          "description": "Label for the cue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": {
+      "type": "array",
+      "description": "Possible outcome stimuli",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["label", "stimulus_ref", "probability"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_]+$",
+            "description": "Outcome label (e.g., 'target', 'nontarget', 'omission')"
+          },
+          "stimulus_ref": {
+            "type": "string",
+            "description": "Reference to outcome stimulus (can be 'omission' for catch trials)"
+          },
+          "probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Probability of this outcome"
+          },
+          "foreperiod": {
+            "$ref": "../core/numeric_field.schema.json",
+            "description": "Optional per-outcome foreperiod override"
+          },
+          "is_omission": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this is an omission/catch trial"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "foreperiod_default": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Default foreperiod in ms (time from cue offset to outcome onset)"
+    },
+    "n_trials": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total number of trials"
+    },
+    "selection": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["iid", "balanced_shuffle", "csv_preset"]
+        },
+        "csv_file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "iti": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Inter-trial interval in ms (from outcome offset to next cue onset)"
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "min_gap_from_same_outcome": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_run_length_per_outcome": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "refractory_ms_after_trial": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "ui_hints": {
+    "label": "Foreperiod Paradigm",
+    "description": "Cue-outcome sequence with variable foreperiod",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["cue", "outcomes", "n_trials"]
+      },
+      {
+        "name": "Timing",
+        "fields": ["foreperiod_default", "iti"]
+      },
+      {
+        "name": "Selection",
+        "fields": ["selection"]
+      },
+      {
+        "name": "Constraints",
+        "fields": ["constraints"],
+        "collapsed_by_default": true
+      }
+    ],
+    "validation_hints": {
+      "outcome_probabilities_sum": {
+        "field": "outcomes.*.probability",
+        "rule": "sum_to_one",
+        "tolerance": 0.001
+      },
+      "unique_outcome_labels": {
+        "field": "outcomes.*.label",
+        "rule": "unique"
+      }
+    }
+  }
+}

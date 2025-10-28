@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/stimuli/tone.simple",
+  "title": "Simple Tone Stimulus",
+  "description": "Pure sinusoidal tone with optional harmonics",
+  "version": "1.0.0",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../core/token_common.schema.json"
+    }
+  ],
+  "required": ["frequency_hz"],
+  "properties": {
+    "type": {
+      "const": "tone.simple"
+    },
+    "frequency_hz": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Fundamental frequency in Hz"
+    },
+    "phase_deg": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 360,
+      "default": 0,
+      "description": "Initial phase in degrees"
+    },
+    "harmonics": {
+      "type": "object",
+      "description": "Optional harmonic complex",
+      "properties": {
+        "num_harmonics": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of harmonics to include (excluding fundamental)"
+        },
+        "amplitude_falloff": {
+          "type": "string",
+          "enum": ["none", "1/n", "1/n^2"],
+          "default": "none",
+          "description": "How harmonic amplitudes decrease with order"
+        },
+        "phase_mode": {
+          "type": "string",
+          "enum": ["sine", "cosine", "alternating", "random"],
+          "default": "sine",
+          "description": "Phase relationship between harmonics"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "ui_hints": {
+    "label": "Pure Tone",
+    "icon": "waveform-sine",
+    "description": "A simple sinusoidal tone at a specific frequency",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["frequency_hz", "duration_ms", "level"]
+      },
+      {
+        "name": "Advanced",
+        "fields": ["phase_deg", "harmonics", "envelope", "am"],
+        "collapsed_by_default": true
+      }
+    ],
+    "field_widgets": {
+      "frequency_hz": {
+        "widget": "spinner",
+        "min": 20,
+        "max": 22000,
+        "step": 10,
+        "units": "Hz",
+        "log_scale": false
+      },
+      "phase_deg": {
+        "widget": "slider",
+        "min": 0,
+        "max": 360,
+        "step": 1,
+        "units": "°"
+      }
+    },
+    "preview_template": "{frequency_hz} Hz tone, {duration_ms} ms"
+  }
+}

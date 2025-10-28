@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/paradigms/freq_level_sweep",
+  "title": "Frequency-Level Sweep Paradigm",
+  "description": "Systematic sweep through frequency and level combinations",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["paradigm_type", "base_stimulus", "frequencies", "levels", "repetitions", "timing"],
+  "properties": {
+    "paradigm_type": {
+      "const": "freq_level_sweep"
+    },
+    "base_stimulus": {
+      "type": "object",
+      "required": ["stimulus_ref"],
+      "properties": {
+        "stimulus_ref": {
+          "type": "string",
+          "description": "Reference to base stimulus template (usually tone)"
+        },
+        "fixed_params": {
+          "type": "object",
+          "description": "Parameters that stay constant across sweep",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "frequencies": {
+      "oneOf": [
+        {
+          "type": "object",
+          "title": "List Mode",
+          "required": ["mode", "values"],
+          "properties": {
+            "mode": {
+              "const": "list"
+            },
+            "values": {
+              "type": "array",
+              "description": "Explicit list of frequencies in Hz",
+              "items": {
+                "type": "number",
+                "minimum": 20
+              },
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Linear Range",
+          "required": ["mode", "min", "max", "steps"],
+          "properties": {
+            "mode": {
+              "const": "linear"
+            },
+            "min": {
+              "type": "number",
+              "minimum": 20
+            },
+            "max": {
+              "type": "number"
+            },
+            "steps": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of steps including endpoints"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Logarithmic Range",
+          "required": ["mode", "min", "max", "steps"],
+          "properties": {
+            "mode": {
+              "const": "log"
+            },
+            "min": {
+              "type": "number",
+              "minimum": 20
+            },
+            "max": {
+              "type": "number"
+            },
+            "steps": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "levels": {
+      "oneOf": [
+        {
+          "type": "object",
+          "title": "List Mode",
+          "required": ["mode", "values"],
+          "properties": {
+            "mode": {
+              "const": "list"
+            },
+            "values": {
+              "type": "array",
+              "description": "Explicit list of levels in dB",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Linear Range",
+          "required": ["mode", "min", "max", "steps"],
+          "properties": {
+            "mode": {
+              "const": "linear"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "steps": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "step_size": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Alternative to steps: specify dB step size"
+            }
+          }
+        }
+      ]
+    },
+    "repetitions": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of repetitions for each freq-level combination"
+    },
+    "randomization": {
+      "type": "object",
+      "required": ["policy"],
+      "properties": {
+        "policy": {
+          "type": "string",
+          "enum": ["none", "block_shuffle", "full_shuffle"],
+          "description": "none: present in order, block_shuffle: randomize within repetitions, full_shuffle: fully randomize"
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Seed for reproducible randomization"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timing": {
+      "type": "object",
+      "required": ["isi_ms", "iti_ms"],
+      "properties": {
+        "isi_ms": {
+          "$ref": "../core/numeric_field.schema.json",
+          "description": "Inter-stimulus interval within a trial (if multiple stimuli)"
+        },
+        "iti_ms": {
+          "$ref": "../core/numeric_field.schema.json",
+          "description": "Inter-trial interval"
+        }
+      },
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "description": "Safety guards",
+      "properties": {
+        "startle_guard": {
+          "type": "object",
+          "description": "Prevent sudden level changes",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "max_level_jump_db": {
+              "type": "number",
+              "minimum": 0,
+              "default": 10,
+              "description": "Maximum allowed dB jump between consecutive trials"
+            }
+          }
+        },
+        "ramp_enforcement": {
+          "type": "object",
+          "properties": {
+            "min_ramp_ms": {
+              "type": "number",
+              "minimum": 0,
+              "default": 5,
+              "description": "Minimum onset/offset ramp"
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "ui_hints": {
+    "label": "Frequency-Level Sweep",
+    "description": "Systematic frequency and level combinations",
+    "parameter_groups": [
+      {
+        "name": "Stimulus",
+        "fields": ["base_stimulus"]
+      },
+      {
+        "name": "Sweep Parameters",
+        "fields": ["frequencies", "levels", "repetitions", "randomization"]
+      },
+      {
+        "name": "Timing",
+        "fields": ["timing"]
+      },
+      {
+        "name": "Safety",
+        "fields": ["safety"],
+        "collapsed_by_default": true
+      }
+    ]
+  }
+}
