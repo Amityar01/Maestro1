@@ -32,7 +32,7 @@ function output_spec = generate(params, context)
     if isfield(params, 'ramp_ms')
         ramp_ms = params.ramp_ms;
     else
-        ramp_ms = 5;  % Default
+        ramp_ms = core.Constants.DEFAULT_RAMP_MS;
     end
     
     % Get sampling rate from context
@@ -77,9 +77,9 @@ function amplitude = db_to_amplitude(db_spl, context)
         ref_db = context.calibration.reference_db;
         ref_amp = context.calibration.reference_amplitude;
     else
-        % Default: 100 dB SPL = amplitude 1.0
-        ref_db = 100;
-        ref_amp = 1.0;
+        % Use default calibration from Constants
+        ref_db = core.Constants.CALIBRATION_REFERENCE_DB;
+        ref_amp = core.Constants.CALIBRATION_REFERENCE_AMPLITUDE;
     end
     
     amplitude = ref_amp * 10^((db_spl - ref_db) / 20);

@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/core/numeric_field",
+  "title": "Numeric Field Union",
+  "description": "A numeric value that can be scalar or sampled from a distribution",
+  "version": "1.0.0",
+  "oneOf": [
+    {
+      "type": "object",
+      "title": "Scalar Value",
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Fixed scalar value"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "title": "Uniform Distribution",
+      "required": ["dist", "min", "max", "scope"],
+      "properties": {
+        "dist": {
+          "type": "string",
+          "const": "uniform"
+        },
+        "min": {
+          "type": "number",
+          "description": "Minimum value (inclusive)"
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum value (inclusive)"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["per_trial", "per_block", "per_session"],
+          "description": "When to sample: per_trial (every trial), per_block (once per block), per_session (once per session)"
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Optional seed for reproducibility"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "title": "Normal Distribution (clipped)",
+      "required": ["dist", "mean", "std", "scope"],
+      "properties": {
+        "dist": {
+          "type": "string",
+          "const": "normal"
+        },
+        "mean": {
+          "type": "number",
+          "description": "Mean of the normal distribution"
+        },
+        "std": {
+          "type": "number",
+          "description": "Standard deviation",
+          "minimum": 0
+        },
+        "clip_min": {
+          "type": "number",
+          "description": "Optional lower bound (clips values below this)"
+        },
+        "clip_max": {
+          "type": "number",
+          "description": "Optional upper bound (clips values above this)"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["per_trial", "per_block", "per_session"]
+        },
+        "seed": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "title": "Log-Uniform Distribution",
+      "required": ["dist", "min", "max", "scope"],
+      "properties": {
+        "dist": {
+          "type": "string",
+          "const": "loguniform"
+        },
+        "min": {
+          "type": "number",
+          "description": "Minimum value (must be > 0)",
+          "exclusiveMinimum": 0
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum value (must be > min)",
+          "exclusiveMinimum": 0
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["per_trial", "per_block", "per_session"]
+        },
+        "seed": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "title": "Categorical Distribution",
+      "required": ["dist", "categories", "probabilities", "scope"],
+      "properties": {
+        "dist": {
+          "type": "string",
+          "const": "categorical"
+        },
+        "categories": {
+          "type": "array",
+          "description": "List of possible values",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2
+        },
+        "probabilities": {
+          "type": "array",
+          "description": "Probability for each category (must sum to 1.0 within tolerance)",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 2
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["per_trial", "per_block", "per_session"]
+        },
+        "seed": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

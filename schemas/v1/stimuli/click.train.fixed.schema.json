@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/stimuli/click.train.fixed",
+  "title": "Fixed-Rate Click Train Stimulus",
+  "description": "Regular train of brief clicks at fixed inter-click interval",
+  "version": "1.0.0",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../core/token_common.schema.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "click.train.fixed"
+    },
+    "ici_ms": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Inter-click interval in milliseconds (mutually exclusive with rate_hz)"
+    },
+    "rate_hz": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Click rate in Hz (mutually exclusive with ici_ms)"
+    },
+    "n_clicks": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of clicks (mutually exclusive with duration_ms for click count)"
+    },
+    "width_us": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 10000,
+      "default": 100,
+      "description": "Click width in microseconds"
+    },
+    "polarity": {
+      "type": "string",
+      "enum": ["positive", "negative", "alternating"],
+      "default": "positive",
+      "description": "Click polarity"
+    }
+  },
+  "oneOf": [
+    {"required": ["ici_ms"]},
+    {"required": ["rate_hz"]}
+  ],
+  "ui_hints": {
+    "label": "Click Train",
+    "icon": "pulse",
+    "description": "Regular train of brief clicks",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["rate_hz", "duration_ms", "level"]
+      },
+      {
+        "name": "Advanced",
+        "fields": ["ici_ms", "n_clicks", "width_us", "polarity"],
+        "collapsed_by_default": true
+      }
+    ],
+    "field_widgets": {
+      "rate_hz": {
+        "widget": "spinner",
+        "min": 1,
+        "max": 1000,
+        "step": 1,
+        "units": "Hz"
+      },
+      "ici_ms": {
+        "widget": "spinner",
+        "min": 1,
+        "max": 1000,
+        "step": 0.1,
+        "units": "ms"
+      },
+      "width_us": {
+        "widget": "spinner",
+        "min": 1,
+        "max": 10000,
+        "step": 1,
+        "units": "µs"
+      }
+    },
+    "preview_template": "{rate_hz} Hz click train, {duration_ms} ms"
+  }
+}

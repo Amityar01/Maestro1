@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/capabilities/engine_capabilities",
+  "title": "Engine Capability Descriptor",
+  "description": "Describes what an engine can do - used for negotiation and compilation",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "engine_id",
+    "engine_version",
+    "sample_rates_supported",
+    "max_channels_audio",
+    "ttl_capabilities"
+  ],
+  "properties": {
+    "engine_id": {
+      "type": "string",
+      "description": "Unique identifier for this engine type (e.g., 'daq_ni', 'ptb_audio')",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "Semantic version of the engine",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "sample_rates_supported": {
+      "type": "array",
+      "description": "List of supported sample rates in Hz",
+      "items": {
+        "type": "integer",
+        "minimum": 1000
+      },
+      "minItems": 1,
+      "examples": [[44100, 48000, 96000, 192000]]
+    },
+    "max_channels_audio": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of simultaneous audio output channels"
+    },
+    "dac_voltage_range": {
+      "type": "object",
+      "description": "DAC output voltage range (optional, for hardware engines)",
+      "required": ["min_v", "max_v"],
+      "properties": {
+        "min_v": {
+          "type": "number"
+        },
+        "max_v": {
+          "type": "number"
+        }
+      }
+    },
+    "ttl_capabilities": {
+      "type": "object",
+      "required": ["available", "polarity"],
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether TTL output is available"
+        },
+        "num_lines": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of available TTL lines (if available=true)"
+        },
+        "pulse_width_ms_min": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum TTL pulse width in milliseconds",
+          "default": 0.01
+        },
+        "polarity": {
+          "type": "string",
+          "enum": ["active_high", "active_low", "configurable"],
+          "description": "TTL signal polarity"
+        }
+      },
+      "additionalProperties": false
+    },
+    "max_buffer_samples": {
+      "type": "integer",
+      "minimum": 1024,
+      "description": "Maximum buffer size in samples"
+    },
+    "supports_double_buffer": {
+      "type": "boolean",
+      "description": "Whether the engine supports double buffering for seamless playback"
+    },
+    "latency_estimate_ms": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Estimated playback latency in milliseconds"
+    },
+    "supports_streaming": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the engine can stream long sequences without loading all into memory"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata about the engine",
+      "properties": {
+        "hardware_model": {
+          "type": "string",
+          "description": "Hardware model (e.g., 'NI-USB-6343')"
+        },
+        "driver_version": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

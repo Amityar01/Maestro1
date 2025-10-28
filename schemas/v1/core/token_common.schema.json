@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/core/token_common",
+  "title": "Token Common Core",
+  "description": "Common fields shared by all stimulus tokens",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["id", "type", "duration_ms", "level", "routing"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this token instance",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "type": {
+      "type": "string",
+      "description": "Stimulus type (e.g., 'tone.simple', 'noise.bandpass', 'cloud.async')"
+    },
+    "duration_ms": {
+      "$ref": "#/definitions/numeric_field",
+      "description": "Stimulus duration in milliseconds"
+    },
+    "level": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": {
+          "$ref": "#/definitions/numeric_field",
+          "description": "Sound level"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["dB_SPL", "dB_FS", "linear_0_1"],
+          "description": "Unit for level specification"
+        },
+        "calibration_ref": {
+          "type": "string",
+          "description": "Reference to calibration file or constant"
+        }
+      },
+      "additionalProperties": false
+    },
+    "envelope": {
+      "type": "object",
+      "required": ["attack_ms", "release_ms"],
+      "properties": {
+        "attack_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Attack/onset ramp duration in milliseconds"
+        },
+        "release_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Release/offset ramp duration in milliseconds"
+        },
+        "shape": {
+          "type": "string",
+          "enum": ["linear", "cosine", "exponential"],
+          "default": "cosine",
+          "description": "Ramp shape"
+        }
+      },
+      "additionalProperties": false
+    },
+    "routing": {
+      "type": "object",
+      "required": ["channels"],
+      "properties": {
+        "channels": {
+          "type": "array",
+          "description": "Target output channels (0-indexed)",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 1
+        },
+        "pan": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Stereo pan: -1 (full left), 0 (center), 1 (full right)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "seed": {
+      "type": "integer",
+      "description": "RNG seed for deterministic generation"
+    },
+    "am": {
+      "type": "object",
+      "description": "Optional amplitude modulation",
+      "required": ["rate_hz", "depth_0_1"],
+      "properties": {
+        "rate_hz": {
+          "$ref": "#/definitions/numeric_field",
+          "description": "Modulation rate in Hz"
+        },
+        "depth_0_1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Modulation depth (0 = no modulation, 1 = full modulation)"
+        },
+        "waveform": {
+          "type": "string",
+          "enum": ["sine", "square", "triangle", "sawtooth"],
+          "default": "sine"
+        },
+        "phase_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "default": 0,
+          "description": "Initial phase in degrees"
+        }
+      },
+      "additionalProperties": false
+    },
+    "preview_hint": {
+      "type": "string",
+      "description": "Human-readable summary for UI preview (e.g., '1000 Hz tone, 150 ms')"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "numeric_field": {
+      "$ref": "numeric_field.schema.json"
+    }
+  }
+}

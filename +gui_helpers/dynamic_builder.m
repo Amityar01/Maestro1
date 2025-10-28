@@ -4,8 +4,10 @@ classdef dynamic_builder
         function templateSelectedCallback(fig, source)
             % This function now has extensive logging to expose hidden errors.
             % (FIXED) It now receives the main figure handle 'fig' directly.
-            
-            fprintf('\n--- Template Selection Changed ---\n');
+
+            fprintf('\n=== CALLBACK TRIGGERED: Template Selection Changed ===\n');
+            fprintf('Source class: %s\n', class(source));
+            fprintf('Source value: %s\n', source.Value);
             
             try
                 % (FIXED) Get handles directly from the figure's UserData.
@@ -20,6 +22,10 @@ classdef dynamic_builder
                 if isempty(selected_idx), fprintf('   -> No template selected.\n'); return; end
                 template_path = source.UserData.files{selected_idx};
                 template_config = jsondecode(fileread(template_path));
+
+                % Store template config in handles for later use by config_manager
+                handles.current_template_config = template_config;
+                handles.control_map = containers.Map(); % Map from control -> config path
                 
                 builder_name = template_config.builder;
                 fprintf('  3. Finding required builder: "%s"\n', builder_name);
@@ -47,7 +53,12 @@ classdef dynamic_builder
                         value = param_meta.default;
                     end
                     
-                    gui_helpers.ui_factory.create_control(handles.editor_panel, param_name, param_meta, value, [20 y_pos]);
+                    control = gui_helpers.ui_factory.create_control(handles.editor_panel, param_name, param_meta, value, [20 y_pos]);
+                    if ~isempty(control)
+                        % Store mapping: control -> config path
+                        config_path = ['trial_params.' param_name];
+                        handles.control_map(num2str(length(handles.control_map)+1)) = struct('control', control, 'path', config_path);
+                    end
                     y_pos = y_pos - 35;
                 end
                 
@@ -83,13 +94,22 @@ classdef dynamic_builder
                             value = param_meta.default;
                         end
                         
-                        gui_helpers.ui_factory.create_control(handles.editor_panel, param_name, param_meta, value, [20 y_pos]);
+                        control = gui_helpers.ui_factory.create_control(handles.editor_panel, param_name, param_meta, value, [20 y_pos]);
+                        if ~isempty(control)
+                            % Store mapping: control -> config path
+                            config_path = ['stimuli.' slot_name '.params.' param_name];
+                            handles.control_map(num2str(length(handles.control_map)+1)) = struct('control', control, 'path', config_path);
+                        end
                         y_pos = y_pos - 35;
                     end
                     y_pos = y_pos - 15;
                 end
+
+                % Save updated handles back to figure
+                fig.UserData = handles;
+
                 fprintf('--- UI Build Complete ---\n');
-                
+
             catch ME
                 fprintf(2, '!!! ERROR BUILDING UI !!!\n');
                 fprintf(2, 'Error in ==> %s (line %d)\n', ME.stack(1).name, ME.stack(1).line);

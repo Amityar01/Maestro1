@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/paradigms/oddball",
+  "title": "Oddball Paradigm",
+  "description": "Repeating standard stimulus with rare deviant stimuli",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["paradigm_type", "tokens", "selection", "iti"],
+  "properties": {
+    "paradigm_type": {
+      "const": "oddball"
+    },
+    "tokens": {
+      "type": "array",
+      "description": "List of stimulus tokens (standard + deviants)",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["label", "stimulus_ref", "base_probability"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_]+$",
+            "description": "Unique label for this token (e.g., 'standard', 'deviant1')"
+          },
+          "stimulus_ref": {
+            "type": "string",
+            "description": "Reference to stimulus definition"
+          },
+          "base_probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Probability of this token appearing"
+          },
+          "code": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "description": "Optional TTL code for this token type"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "n_trials": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total number of trials in the block"
+    },
+    "selection": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["iid", "balanced_shuffle", "csv_preset"],
+          "description": "How to select stimuli across trials"
+        },
+        "csv_file": {
+          "type": "string",
+          "description": "Path to CSV file if mode=csv_preset"
+        }
+      },
+      "additionalProperties": false
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Optional constraints on stimulus sequences",
+      "properties": {
+        "min_gap_from_same_label": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum number of trials between same token labels"
+        },
+        "max_run_length_per_label": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum consecutive trials with same label"
+        },
+        "refractory_ms_after_onset": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum silent gap after stimulus onset before next trial"
+        }
+      },
+      "additionalProperties": false
+    },
+    "iti": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Inter-trial interval in milliseconds"
+    }
+  },
+  "additionalProperties": false,
+  "ui_hints": {
+    "label": "Oddball Paradigm",
+    "description": "Standard stimulus with rare deviants",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["n_trials", "tokens", "iti"]
+      },
+      {
+        "name": "Selection",
+        "fields": ["selection"]
+      },
+      {
+        "name": "Constraints",
+        "fields": ["constraints"],
+        "collapsed_by_default": true
+      }
+    ],
+    "validation_hints": {
+      "probabilities_sum": {
+        "field": "tokens.*.base_probability",
+        "rule": "sum_to_one",
+        "tolerance": 0.001,
+        "message": "Token probabilities must sum to 1.0 (±0.001)"
+      },
+      "unique_labels": {
+        "field": "tokens.*.label",
+        "rule": "unique",
+        "message": "Each token must have a unique label"
+      }
+    }
+  }
+}

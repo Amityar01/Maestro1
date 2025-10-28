@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/paradigms/local_global",
+  "title": "Local-Global Paradigm",
+  "description": "Hierarchical structure with symbols forming patterns (e.g., AAAA vs AAAB)",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["paradigm_type", "symbols", "patterns", "timing"],
+  "properties": {
+    "paradigm_type": {
+      "const": "local_global"
+    },
+    "symbols": {
+      "type": "array",
+      "description": "Symbol inventory (e.g., A, B, O for omission)",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["symbol", "stimulus_ref"],
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]$",
+            "description": "Single character symbol identifier"
+          },
+          "stimulus_ref": {
+            "type": "string",
+            "description": "Reference to stimulus definition"
+          },
+          "is_omission": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this symbol represents an omitted stimulus"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "description": "Pattern templates (e.g., AAAA, AAAB)",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "elements", "probability"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_]+$",
+            "description": "Pattern name (e.g., 'standard_AAAA', 'deviant_AAAB')"
+          },
+          "elements": {
+            "type": "array",
+            "description": "Sequence of symbols",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["symbol"],
+              "properties": {
+                "symbol": {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9]$",
+                  "description": "Symbol from symbols array"
+                },
+                "position_overrides": {
+                  "type": "object",
+                  "description": "Optional per-position parameter overrides",
+                  "additionalProperties": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "onset_mode": {
+            "type": "string",
+            "enum": ["grid", "absolute"],
+            "default": "grid",
+            "description": "How to schedule elements: grid (regular IOI) or absolute (ms timestamps)"
+          },
+          "absolute_onsets_ms": {
+            "type": "array",
+            "description": "Absolute onset times if onset_mode=absolute",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Probability of this pattern appearing"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "n_trials": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total number of pattern presentations"
+    },
+    "selection": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["iid", "balanced_shuffle", "csv_preset"]
+        },
+        "csv_file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timing": {
+      "type": "object",
+      "required": ["ioi_ms", "iti_ms"],
+      "properties": {
+        "ioi_ms": {
+          "$ref": "../core/numeric_field.schema.json",
+          "description": "Inter-onset interval within patterns (for grid mode)"
+        },
+        "iti_ms": {
+          "$ref": "../core/numeric_field.schema.json",
+          "description": "Inter-trial interval between patterns"
+        }
+      },
+      "additionalProperties": false
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "min_gap_from_same_pattern": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_run_length_per_pattern": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "refractory_ms_after_pattern": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "ui_hints": {
+    "label": "Local-Global Paradigm",
+    "description": "Hierarchical patterns with repeating symbols",
+    "parameter_groups": [
+      {
+        "name": "Symbols",
+        "fields": ["symbols"]
+      },
+      {
+        "name": "Patterns",
+        "fields": ["patterns", "n_trials", "selection"]
+      },
+      {
+        "name": "Timing",
+        "fields": ["timing"]
+      },
+      {
+        "name": "Constraints",
+        "fields": ["constraints"],
+        "collapsed_by_default": true
+      }
+    ],
+    "validation_hints": {
+      "pattern_probabilities_sum": {
+        "field": "patterns.*.probability",
+        "rule": "sum_to_one",
+        "tolerance": 0.001
+      },
+      "symbols_used": {
+        "rule": "custom",
+        "message": "All pattern symbols must exist in symbols array"
+      }
+    }
+  }
+}

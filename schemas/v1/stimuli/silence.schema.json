@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://maestro.neuroscience/schemas/v1/stimuli/silence",
+  "title": "Silence Stimulus",
+  "description": "Silent interval (zeros) with optional envelope for smooth transitions",
+  "version": "1.0.0",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../core/token_common.schema.json"
+    }
+  ],
+  "required": ["duration_ms"],
+  "properties": {
+    "type": {
+      "const": "silence"
+    },
+    "duration_ms": {
+      "$ref": "../core/numeric_field.schema.json",
+      "description": "Duration of silence in milliseconds"
+    }
+  },
+  "ui_hints": {
+    "label": "Silence",
+    "icon": "volume-mute",
+    "description": "Silent interval",
+    "parameter_groups": [
+      {
+        "name": "Basic",
+        "fields": ["duration_ms"]
+      },
+      {
+        "name": "Advanced",
+        "fields": ["envelope"],
+        "collapsed_by_default": true
+      }
+    ],
+    "field_widgets": {
+      "duration_ms": {
+        "widget": "spinner",
+        "min": 0,
+        "max": 10000,
+        "step": 1,
+        "units": "ms"
+      }
+    },
+    "preview_template": "Silence, {duration_ms} ms"
+  }
+}

@@ -49,12 +49,24 @@ function launch_gui()
     handles.playlist_list = playlist_list;
     
     % --- CORRECTED DISCOVERY CALLS ---
-    handles.builders = gui_helpers.discovery.find_components('+trials/+builders');
-    handles.stimuli = gui_helpers.discovery.find_components('+stim');
+    handles.builders = gui_helpers.discovery.find_components('trials.builders');
+    handles.stimuli = gui_helpers.discovery.find_components('stim');
     
     [template_names, template_files] = gui_helpers.discovery.find_templates('block_templates');
+
+    % Ensure template_names is a cell array for uilistbox
+    if ~iscell(template_names)
+        template_names = {template_names};
+    end
+
     template_list.Items = template_names;
     template_list.UserData = struct('files', {template_files});
+
+    % Set initial value if templates exist
+    if ~isempty(template_names)
+        template_list.Value = template_names{1};
+        fprintf(' -> Template list populated with: %s\n', strjoin(template_names, ', '));
+    end
     
     fprintf(' -> Found %d templates, %d builders, %d stimuli.\n', ...
         numel(template_names), handles.builders.Count, handles.stimuli.Count);
@@ -62,7 +74,7 @@ function launch_gui()
     fig.UserData = handles;
     
     % --- Assign Callbacks ---
-    template_list.ValueChangedFcn = @(src, ~) gui_helpers.dynamic_builder.build_ui_for_template(fig, src);
+    template_list.ValueChangedFcn = @(src, ~) gui_helpers.dynamic_builder.templateSelectedCallback(fig, src);
     save_button.ButtonPushedFcn = @(src, ~) gui_helpers.config_manager.save_to_playlist(fig);
     
     % Add playlist management callbacks
@@ -70,7 +82,16 @@ function launch_gui()
     move_down_btn.ButtonPushedFcn = @(src, ~) manage_playlist('down', fig);
     remove_btn.ButtonPushedFcn = @(src, ~) manage_playlist('remove', fig);
 
+    % Add experiment execution callback
+    run_experiment_btn.ButtonPushedFcn = @(src, ~) run_experiment_from_gui(fig);
+
     fprintf('✓ GUI Ready.\n');
+
+    % Trigger initial template load if a template was auto-selected
+    if ~isempty(template_names)
+        fprintf(' -> Auto-loading first template...\n');
+        gui_helpers.dynamic_builder.templateSelectedCallback(fig, template_list);
+    end
 end
 
 function manage_playlist(action, fig)
@@ -112,6 +133,126 @@ function manage_playlist(action, fig)
                 listbox.Items = items;
                 listbox.Value = selected_item;
             end
+    end
+end
+
+function run_experiment_from_gui(fig)
+    % Executes experiment from the current playlist
+
+    handles = fig.UserData;
+    listbox = handles.playlist_list;
+
+    % Check if playlist is empty
+    if isempty(listbox.Items)
+        uialert(fig, 'Playlist is empty. Add blocks to the playlist before running.', ...
+            'Empty Playlist', 'Icon', 'warning');
+        return;
+    end
+
+    % Get playlist data (block configurations)
+    playlist_data = listbox.UserData;
+    if isempty(playlist_data)
+        uialert(fig, 'Playlist contains no block data.', ...
+            'Invalid Playlist', 'Icon', 'error');
+        return;
+    end
+
+    % Prompt for session information
+    prompt = {'Subject ID:', 'Experimenter:', 'Session Number:'};
+    dlgtitle = 'Session Information';
+    dims = [1 35];
+    definput = {'S001', getenv('USER'), '1'};
+    answer = inputdlg(prompt, dlgtitle, dims, definput);
+
+    if isempty(answer)
+        return; % User cancelled
+    end
+
+    subject_id = answer{1};
+    experimenter = answer{2};
+    session_num = str2double(answer{3});
+
+    % Validate inputs
+    if isempty(subject_id) || isempty(experimenter) || isnan(session_num)
+        uialert(fig, 'All session fields are required.', ...
+            'Invalid Input', 'Icon', 'error');
+        return;
+    end
+
+    % Show progress dialog
+    progress = uiprogressdlg(fig, 'Title', 'Running Experiment', ...
+        'Message', 'Initializing...', 'Indeterminate', 'on');
+
+    try
+        % Create MaestroContext
+        progress.Message = 'Loading Maestro context...';
+        context = MaestroContext(pwd);
+
+        % Build experiment specification from playlist
+        progress.Message = 'Building experiment specification...';
+        experiment_spec = struct();
+        experiment_spec.experiment_id = sprintf('%s_session%d', subject_id, session_num);
+        experiment_spec.global_settings = struct();
+        experiment_spec.global_settings.sampling_rate_hz = core.Constants.DEFAULT_SAMPLING_RATE_HZ;
+        experiment_spec.global_settings.subject_id = subject_id;
+        experiment_spec.global_settings.experimenter = experimenter;
+        experiment_spec.global_settings.session_number = session_num;
+
+        % Add blocks from playlist
+        experiment_spec.sequence = cell(1, length(playlist_data));
+        for i = 1:length(playlist_data)
+            block_config = playlist_data{i};
+
+            % Normalize block instance
+            block_instance = core.normalization.InstanceNormalizer.ensure_block_instance(block_config);
+
+            % Store in sequence
+            experiment_spec.sequence{i} = block_instance;
+        end
+
+        % Validate experiment spec
+        progress.Message = 'Validating experiment specification...';
+        core.validation.ValidationHelpers.validate_experiment_spec(experiment_spec);
+
+        % Create session directory and prepare for execution
+        progress.Message = 'Creating session directory...';
+        session_id = sprintf('%s_%s', experiment_spec.experiment_id, ...
+            datestr(now, 'yyyymmdd_HHMMSS'));
+        session_dir = fullfile(pwd, 'sessions', session_id);
+        if ~exist(session_dir, 'dir')
+            mkdir(session_dir);
+        end
+
+        % Save experiment specification
+        spec_file = fullfile(session_dir, 'experiment_spec.json');
+        core.config.ConfigurationManager.save_json_file(experiment_spec, spec_file);
+
+        % Execute experiment
+        progress.Message = sprintf('Executing experiment with %d blocks...', length(experiment_spec.sequence));
+        progress.Indeterminate = 'off';
+        progress.Value = 0;
+
+        % Run experiment with logging
+        result = context.run_experiment_with_logging(experiment_spec, session_dir);
+
+        progress.Value = 1;
+        close(progress);
+
+        % Show success message
+        if strcmp(result.status, core.Constants.STATUS_COMPLETED)
+            uialert(fig, sprintf('Experiment completed successfully!\nSession ID: %s\nResults saved to: %s', ...
+                session_id, session_dir), 'Success', 'Icon', 'success');
+        else
+            uialert(fig, sprintf('Experiment finished with status: %s\nCheck session logs for details.', ...
+                result.status), 'Experiment Finished', 'Icon', 'warning');
+        end
+
+    catch ME
+        close(progress);
+        uialert(fig, sprintf('Error running experiment:\n%s\n\nDetails: %s', ...
+            ME.message, ME.identifier), 'Experiment Error', 'Icon', 'error');
+        fprintf('Full error details:\n');
+        disp(getReport(ME));
     end
 end
 

@@ -46,16 +46,16 @@ classdef MaestroContext < handle
 
             fprintf('Maestro: Discovering plugins...\n');
 
-            % Discover plugins
-            obj.generators = core.discover_generators(...
+            % Discover plugins using unified discovery system
+            obj.generators = core.discovery.PluginDiscovery.discover_generators(...
                 fullfile(obj.base_path, '+generators'));
             fprintf('  Found %d generators\n', length(obj.generators));
 
-            obj.builders = core.discover_builders(...
+            obj.builders = core.discovery.PluginDiscovery.discover_builders(...
                 fullfile(obj.base_path, '+builders'));
             fprintf('  Found %d builders\n', length(obj.builders));
 
-            obj.engines = core.discover_engines(...
+            obj.engines = core.discovery.PluginDiscovery.discover_engines(...
                 fullfile(obj.base_path, '+engines'));
             fprintf('  Found %d engines\n', length(obj.engines));
 

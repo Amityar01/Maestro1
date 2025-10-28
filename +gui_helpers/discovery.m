@@ -22,38 +22,35 @@ classdef discovery
         
         function component_map = find_components(package_name)
             % Discovers self-describing components (builders or stimuli)
-            % using MATLAB's robust 'what()' function to handle packages.
+            % Converts MATLAB package notation to filesystem paths
             component_map = containers.Map();
-            
-            % Use 'what' to get the actual path to the package
-            package_info = what(package_name);
-            if isempty(package_info)
-                fprintf('Warning: Could not find package "%s". Is it on the MATLAB path?\n', package_name);
+
+            % Convert package notation (e.g., 'trials.builders') to filesystem path (e.g., '+trials/+builders')
+            package_parts = strsplit(package_name, '.');
+            path_parts = cellfun(@(x) ['+' x], package_parts, 'UniformOutput', false);
+            package_path = fullfile(path_parts{:});
+
+            % Check if the package directory exists
+            if ~exist(package_path, 'dir')
+                fprintf('Warning: Could not find package directory "%s" (looking for "%s")\n', package_name, package_path);
                 return;
             end
-            
-            package_path = package_info(1).path;
-            
+
             listing = dir(fullfile(package_path, '*.m'));
             for i = 1:numel(listing)
                 [~, name, ~] = fileparts(listing(i).name);
                 json_file = fullfile(package_path, [name '.json']);
-                
+
                 if exist(json_file, 'file')
                     try
                         metadata = jsondecode(fileread(json_file));
-                        
-                        % --- FIX: Sanitize package name for str2func ---
-                        % Convert file path style (+folder/sub) to package style (folder.sub)
-                        clean_package_name = strrep(package_name, '+', '');
-                        clean_package_name = strrep(clean_package_name, '/', '.');
-                        clean_package_name = strrep(clean_package_name, '\', '.');
-                        
-                        function_string = [clean_package_name '.' name];
+
+                        % Create function handle from package name and function name
+                        function_string = [package_name '.' name];
                         metadata.function_handle = str2func(function_string);
-                        
+
                         component_map(name) = metadata;
-                        fprintf('  ✓ Discovered Component: %s\n', name);
+                        fprintf('  ✓ Discovered Component: %s (as %s)\n', name, function_string);
                     catch ME
                         fprintf('Warning: Could not parse component JSON %s. Reason: %s\n', json_file, ME.message);
                     end
