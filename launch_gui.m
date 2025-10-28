@@ -49,8 +49,8 @@ function launch_gui()
     handles.playlist_list = playlist_list;
     
     % --- CORRECTED DISCOVERY CALLS ---
-    handles.builders = gui_helpers.discovery.find_components('+trials/+builders');
-    handles.stimuli = gui_helpers.discovery.find_components('+stim');
+    handles.builders = gui_helpers.discovery.find_components('trials.builders');
+    handles.stimuli = gui_helpers.discovery.find_components('stim');
     
     [template_names, template_files] = gui_helpers.discovery.find_templates('block_templates');
     template_list.Items = template_names;
