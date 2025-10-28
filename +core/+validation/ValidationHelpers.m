@@ -28,10 +28,14 @@ classdef ValidationHelpers
                 if ~isfield(structure, field)
                     missing{end+1} = field; %#ok<AGROW>
                 else
-                    % Field exists, check if it's empty
+                    % Field exists, check if it's truly empty/undefined
+                    % Note: Empty collections like {} are valid values (field is present)
+                    % Only mark as missing if it's a scalar empty value ([], '', etc.)
                     try
                         field_value = structure.(field);
-                        if isempty(field_value)
+                        % Empty cell arrays and structs are valid (field is present, just empty)
+                        % Only mark missing if it's [] or '' or other scalar empty
+                        if isempty(field_value) && ~iscell(field_value) && ~isstruct(field_value)
                             missing{end+1} = field; %#ok<AGROW>
                         end
                     catch
