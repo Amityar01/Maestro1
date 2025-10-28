@@ -53,8 +53,20 @@ function launch_gui()
     handles.stimuli = gui_helpers.discovery.find_components('stim');
     
     [template_names, template_files] = gui_helpers.discovery.find_templates('block_templates');
+
+    % Ensure template_names is a cell array for uilistbox
+    if ~iscell(template_names)
+        template_names = {template_names};
+    end
+
     template_list.Items = template_names;
     template_list.UserData = struct('files', {template_files});
+
+    % Set initial value if templates exist
+    if ~isempty(template_names)
+        template_list.Value = template_names{1};
+        fprintf(' -> Template list populated with: %s\n', strjoin(template_names, ', '));
+    end
     
     fprintf(' -> Found %d templates, %d builders, %d stimuli.\n', ...
         numel(template_names), handles.builders.Count, handles.stimuli.Count);
@@ -74,6 +86,12 @@ function launch_gui()
     run_experiment_btn.ButtonPushedFcn = @(src, ~) run_experiment_from_gui(fig);
 
     fprintf('✓ GUI Ready.\n');
+
+    % Trigger initial template load if a template was auto-selected
+    if ~isempty(template_names)
+        fprintf(' -> Auto-loading first template...\n');
+        gui_helpers.dynamic_builder.templateSelectedCallback(fig, template_list);
+    end
 end
 
 function manage_playlist(action, fig)

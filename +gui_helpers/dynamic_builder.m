@@ -4,8 +4,10 @@ classdef dynamic_builder
         function templateSelectedCallback(fig, source)
             % This function now has extensive logging to expose hidden errors.
             % (FIXED) It now receives the main figure handle 'fig' directly.
-            
-            fprintf('\n--- Template Selection Changed ---\n');
+
+            fprintf('\n=== CALLBACK TRIGGERED: Template Selection Changed ===\n');
+            fprintf('Source class: %s\n', class(source));
+            fprintf('Source value: %s\n', source.Value);
             
             try
                 % (FIXED) Get handles directly from the figure's UserData.
