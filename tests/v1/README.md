@@ -67,6 +67,40 @@ Tests for pattern builder core:
 
 **Tests**: 18 test methods
 
+### TestOddballAdapter
+Tests for oddball paradigm adapter:
+- Trial plan generation from oddball configs
+- IID selection mode (true random sampling)
+- Balanced shuffle mode (exact proportions)
+- CSV preset mode (predefined sequences)
+- Constraint enforcement (max consecutive deviants/standards)
+- Multi-token oddball (2-tone, 3-tone)
+- TTL code assignment
+- Probability distribution handling
+- Element timing and duration
+- Determinism (seed-based reproducibility)
+- Metadata preservation
+- Validation and error handling
+
+**Tests**: 22 test methods
+
+### TestLocalGlobalAdapter
+Tests for Local-Global paradigm adapter:
+- Trial plan generation with multi-element trials
+- Pattern expansion (AAAB → 4 elements)
+- IOI timing (inter-onset interval within patterns)
+- Pattern selection (IID, balanced shuffle)
+- Symbol tracking (A/B in each element)
+- Multi-pattern designs (AAAB, AAAA, BBBA)
+- Element structure and timing
+- Variable pattern lengths (4-element, 5-element)
+- Token duration handling
+- Determinism (seed-based reproducibility)
+- Metadata preservation
+- Validation and error handling
+
+**Tests**: 21 test methods
+
 ## Running Tests
 
 ### Run All Tests
@@ -81,6 +115,8 @@ run_tests_v1('TestCustomValidators')
 run_tests_v1('TestSampling')
 run_tests_v1('TestGenerators')
 run_tests_v1('TestPatternBuilder')
+run_tests_v1('TestOddballAdapter')
+run_tests_v1('TestLocalGlobalAdapter')
 ```
 
 ### Run with Verbose Output
@@ -204,10 +240,12 @@ tests/v1/
 ├── TestCustomValidators.m           (16 tests)
 ├── TestSampling.m                   (28 tests)
 ├── TestGenerators.m                 (19 tests)
-└── TestPatternBuilder.m             (18 tests)
+├── TestPatternBuilder.m             (18 tests)
+├── TestOddballAdapter.m             (22 tests)
+└── TestLocalGlobalAdapter.m         (21 tests)
 ```
 
-Total: **103 unit tests**
+Total: **146 unit tests**
 
 ## Milestones
 
@@ -215,8 +253,9 @@ Total: **103 unit tests**
 - ✅ M2: Sampling framework tests (28 tests)
 - ✅ M2: Generator tests (19 tests)
 - ✅ M3: Pattern builder tests (18 tests)
-- ⏳ M4: Paradigm adapter tests (pending)
+- ✅ M4: Paradigm adapter tests (43 tests)
 - ⏳ M5: Compiler tests (pending)
+- ⏳ M6: DAQ Engine tests (pending)
 
 ## Debugging Failed Tests
 
