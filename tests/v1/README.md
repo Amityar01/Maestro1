@@ -37,6 +37,36 @@ Tests for sampling framework:
 
 **Tests**: 28 test methods
 
+### TestGenerators
+Tests for generator framework and tone.simple:
+- GeneratorContext creation and resource access
+- RNG stream access for deterministic generation
+- Field sampling integration
+- tone.simple generator: basic generation, determinism, frequency accuracy
+- Envelope application (linear, cosine, exponential)
+- Level scaling (linear_0_1, dB_FS)
+- Sampling integration with jittered parameters
+- Metadata output (peak, RMS, hash, realized_params)
+- Phase control and stereo routing
+- Validation and clipping detection
+
+**Tests**: 19 test methods
+
+### TestPatternBuilder
+Tests for pattern builder core:
+- Single and multiple elements per trial expansion
+- Absolute onset computation (trial timing + ITI)
+- IOI (inter-onset interval) resolution
+- Refractory period enforcement
+- Element indexing (0-based within trials)
+- Role assignment (cue/outcome preservation)
+- Symbol tracking (for Local-Global patterns)
+- Empty trial handling (omissions)
+- Table structure validation
+- Trial window computation
+
+**Tests**: 18 test methods
+
 ## Running Tests
 
 ### Run All Tests
@@ -49,6 +79,8 @@ run_tests_v1
 run_tests_v1('TestNumericFieldValidator')
 run_tests_v1('TestCustomValidators')
 run_tests_v1('TestSampling')
+run_tests_v1('TestGenerators')
+run_tests_v1('TestPatternBuilder')
 ```
 
 ### Run with Verbose Output
@@ -167,20 +199,23 @@ matlab -batch "run_tests_v1"
 
 ```
 tests/v1/
-├── README.md                      (this file)
-├── TestNumericFieldValidator.m   (22 tests)
-├── TestCustomValidators.m        (16 tests)
-└── TestSampling.m                (28 tests)
+├── README.md                         (this file)
+├── TestNumericFieldValidator.m      (22 tests)
+├── TestCustomValidators.m           (16 tests)
+├── TestSampling.m                   (28 tests)
+├── TestGenerators.m                 (19 tests)
+└── TestPatternBuilder.m             (18 tests)
 ```
 
-Total: **66 unit tests**
+Total: **103 unit tests**
 
 ## Milestones
 
 - ✅ M1: Validation framework tests (38 tests)
 - ✅ M2: Sampling framework tests (28 tests)
-- ⏳ M3: Generator tests (pending)
-- ⏳ M4: Pattern builder tests (pending)
+- ✅ M2: Generator tests (19 tests)
+- ✅ M3: Pattern builder tests (18 tests)
+- ⏳ M4: Paradigm adapter tests (pending)
 - ⏳ M5: Compiler tests (pending)
 
 ## Debugging Failed Tests
