@@ -1,0 +1,215 @@
+# Maestro v1 Unit Tests
+
+Comprehensive unit test suite for v1 architecture using MATLAB's unittest framework.
+
+## Test Classes
+
+### TestNumericFieldValidator
+Tests for numeric field validation (scalar and distributions):
+- Scalar values (implicit and explicit)
+- Uniform distribution validation
+- Normal distribution validation
+- Log-uniform distribution validation
+- Categorical distribution validation
+- Scope validation
+- Error detection
+
+**Tests**: 22 test methods
+
+### TestCustomValidators
+Tests for domain-specific validators:
+- Probability sum validation
+- Unique label validation
+- Oddball configuration validation
+- Local-Global configuration validation
+- Error reporting
+
+**Tests**: 16 test methods
+
+### TestSampling
+Tests for sampling framework:
+- RNG stream management and determinism
+- Distribution samplers (uniform, normal, loguniform, categorical)
+- Scope management (per_trial, per_block, per_session)
+- NumericFieldSampler integration
+- Struct sampling
+- Reproducibility verification
+
+**Tests**: 28 test methods
+
+## Running Tests
+
+### Run All Tests
+```matlab
+run_tests_v1
+```
+
+### Run Specific Test Class
+```matlab
+run_tests_v1('TestNumericFieldValidator')
+run_tests_v1('TestCustomValidators')
+run_tests_v1('TestSampling')
+```
+
+### Run with Verbose Output
+```matlab
+run_tests_v1('verbose')
+```
+
+### Run with Code Coverage
+```matlab
+run_tests_v1('coverage')
+```
+
+### Combine Options
+```matlab
+run_tests_v1('TestSampling', 'verbose')
+```
+
+## Using MATLAB's Test Runner Directly
+
+```matlab
+% Run all tests
+runtests('tests/v1')
+
+% Run specific test
+runtests('tests/v1/TestNumericFieldValidator')
+
+% Run with coverage
+import matlab.unittest.TestRunner;
+import matlab.unittest.plugins.CodeCoveragePlugin;
+
+suite = testsuite('tests/v1');
+runner = TestRunner.withTextOutput;
+runner.addPlugin(CodeCoveragePlugin.forFolder('+v1'));
+results = runner.run(suite);
+```
+
+## Test Coverage
+
+Current coverage (as of latest commit):
+- **Validation Framework**: ~95% coverage
+- **Sampling Framework**: ~95% coverage
+
+Target coverage: >90% for all modules
+
+## Adding New Tests
+
+### Creating a New Test Class
+
+```matlab
+classdef TestMyFeature < matlab.unittest.TestCase
+    methods (Test)
+        function testBasicFunctionality(testCase)
+            result = my_feature();
+            testCase.verifyTrue(result);
+        end
+
+        function testEdgeCase(testCase)
+            result = my_feature('edge_case');
+            testCase.verifyEqual(result, expected_value);
+        end
+    end
+end
+```
+
+Save to `tests/v1/TestMyFeature.m`
+
+### Test Method Setup
+
+Use `TestMethodSetup` for initialization before each test:
+
+```matlab
+properties
+    sampler
+end
+
+methods (TestMethodSetup)
+    function createSampler(testCase)
+        testCase.sampler = v1.sampling.NumericFieldSampler(...);
+    end
+end
+```
+
+### Common Assertions
+
+```matlab
+% Equality
+testCase.verifyEqual(actual, expected)
+testCase.verifyEqual(actual, expected, 'AbsTol', 0.01)
+
+% Boolean
+testCase.verifyTrue(condition)
+testCase.verifyFalse(condition)
+
+% Comparisons
+testCase.verifyGreaterThan(value, threshold)
+testCase.verifyLessThan(value, threshold)
+
+% Empty/Not Empty
+testCase.verifyEmpty(value)
+testCase.verifyNotEmpty(value)
+
+% Errors
+testCase.verifyError(@() func(), 'ErrorID')
+```
+
+## Continuous Integration
+
+These tests are designed to run in CI/CD pipelines:
+
+```bash
+# Run tests in batch mode (exits with error code if tests fail)
+matlab -batch "run_tests_v1"
+```
+
+## Test Organization
+
+```
+tests/v1/
+├── README.md                      (this file)
+├── TestNumericFieldValidator.m   (22 tests)
+├── TestCustomValidators.m        (16 tests)
+└── TestSampling.m                (28 tests)
+```
+
+Total: **66 unit tests**
+
+## Milestones
+
+- ✅ M1: Validation framework tests (38 tests)
+- ✅ M2: Sampling framework tests (28 tests)
+- ⏳ M3: Generator tests (pending)
+- ⏳ M4: Pattern builder tests (pending)
+- ⏳ M5: Compiler tests (pending)
+
+## Debugging Failed Tests
+
+If tests fail, run with verbose output:
+```matlab
+run_tests_v1('TestSampling', 'verbose')
+```
+
+Or debug interactively:
+```matlab
+% Set breakpoint in test method
+dbstop in TestSampling at 142
+
+% Run the test
+runtests('tests/v1/TestSampling')
+```
+
+## Best Practices
+
+1. **One assertion per test** (when possible) - makes failures easier to diagnose
+2. **Descriptive test names** - `testUniformRangeValidation` not `test1`
+3. **Setup/teardown** - Use `TestMethodSetup` and `TestMethodTeardown`
+4. **Deterministic tests** - Always use fixed seeds for RNG-based tests
+5. **Fast tests** - Each test should run in < 1 second
+6. **Independent tests** - Tests should not depend on each other
+
+## See Also
+
+- Demo scripts: `test_validation_v1.m`, `test_sampling_v1.m` (interactive demonstrations)
+- MATLAB unittest documentation: `doc matlab.unittest.TestCase`
+- Architecture docs: `ARCHITECTURE_V1.md`
