@@ -126,7 +126,7 @@ classdef TestCompiler < matlab.unittest.TestCase
 
             for i = 1:height(element_table)
                 sample_idx = onset_samples(i);
-                testCase.verifyEqual(seq_file.ttl(sample_idx), element_table.ttl_code(i), ...
+                testCase.verifyEqual(seq_file.ttl(sample_idx), uint8(element_table.ttl_code(i)), ...
                     sprintf('TTL code %d should be at sample %d', element_table.ttl_code(i), sample_idx));
             end
         end
@@ -148,7 +148,7 @@ classdef TestCompiler < matlab.unittest.TestCase
 
             % Check pulse returns to 0 after
             if onset_sample + ttl_pulse_duration <= length(seq_file.ttl)
-                testCase.verifyEqual(seq_file.ttl(onset_sample + ttl_pulse_duration), 0, ...
+                testCase.verifyEqual(seq_file.ttl(onset_sample + ttl_pulse_duration), uint8(0), ...
                     'TTL should return to 0 after pulse');
             end
         end
@@ -309,13 +309,9 @@ classdef TestCompiler < matlab.unittest.TestCase
 
         function testEmptyElementTable(testCase)
             % Test compilation with no elements (edge case)
-            element_table = table();
-            element_table.trial_index = [];
-            element_table.element_index = [];
-            element_table.stimulus_ref = {};
-            element_table.absolute_onset_ms = [];
-            element_table.duration_ms = [];
-            element_table.label = {};
+            element_table = table([], [], {}, [], [], {}, ...
+                'VariableNames', {'trial_index', 'element_index', 'stimulus_ref', ...
+                                 'absolute_onset_ms', 'duration_ms', 'label'});
 
             seq_file = testCase.compiler.compile(element_table, testCase.stimulus_library, ...
                                                  testCase.fs_hz, testCase.context);

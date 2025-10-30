@@ -256,10 +256,10 @@ classdef CustomValidators
                     symbol_chars = cellfun(@(s) s.symbol, lg_config.symbols, 'UniformOutput', false);
 
                     for i = 1:length(lg_config.patterns)
-                        pattern = lg_config.patterns(i);
+                        pattern = lg_config.patterns{i};  % Extract struct from cell array
                         if isfield(pattern, 'elements')
                             for j = 1:length(pattern.elements)
-                                element = pattern.elements(j);
+                                element = pattern.elements{j};  % Extract struct from cell array
                                 if isfield(element, 'symbol')
                                     if ~ismember(element.symbol, symbol_chars)
                                         errors{end+1} = v1.validation.ValidationError(...
