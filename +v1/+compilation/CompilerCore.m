@@ -232,6 +232,18 @@ classdef CompilerCore < handle
                     generator = v1.generators.ToneSimpleGenerator();
                     [audio, metadata] = generator.generate(stimulus_def, context);
 
+                case 'noise.bandpass'
+                    generator = v1.generators.NoiseBandpassGenerator();
+                    [audio, metadata] = generator.generate(stimulus_def, context);
+
+                case 'click.train.fixed'
+                    generator = v1.generators.ClickTrainFixedGenerator();
+                    [audio, metadata] = generator.generate(stimulus_def, context);
+
+                case 'silence'
+                    generator = v1.generators.SilenceGenerator();
+                    [audio, metadata] = generator.generate(stimulus_def, context);
+
                 otherwise
                     error('CompilerCore:UnsupportedStimulus', ...
                         'Unsupported stimulus type: %s', stimulus_def.type);
