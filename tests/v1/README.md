@@ -120,6 +120,22 @@ Tests for SequenceFile compiler:
 
 **Tests**: 20 test methods
 
+### TestDAQEngine
+Tests for DAQ playback engine:
+- Engine creation and configuration
+- SequenceFile loading and validation
+- Hardware configuration (channels, sample rate)
+- Dry-run mode playback (no hardware)
+- Playback control (start, stop, reset)
+- Playback state management
+- Event recording with timestamps
+- TTL channel mapping
+- Sample rate validation
+- Playback metadata (start/end times, hash)
+- Error handling (no sequence, not configured, sample rate mismatch)
+
+**Tests**: 18 test methods
+
 ## Running Tests
 
 ### Run All Tests
@@ -137,6 +153,7 @@ run_tests_v1('TestPatternBuilder')
 run_tests_v1('TestOddballAdapter')
 run_tests_v1('TestLocalGlobalAdapter')
 run_tests_v1('TestCompiler')
+run_tests_v1('TestDAQEngine')
 ```
 
 ### Run with Verbose Output
@@ -263,10 +280,11 @@ tests/v1/
 ├── TestPatternBuilder.m             (18 tests)
 ├── TestOddballAdapter.m             (22 tests)
 ├── TestLocalGlobalAdapter.m         (21 tests)
-└── TestCompiler.m                   (20 tests)
+├── TestCompiler.m                   (20 tests)
+└── TestDAQEngine.m                  (18 tests)
 ```
 
-Total: **166 unit tests**
+Total: **184 unit tests**
 
 ## Milestones
 
@@ -276,7 +294,7 @@ Total: **166 unit tests**
 - ✅ M3: Pattern builder tests (18 tests)
 - ✅ M4: Paradigm adapter tests (43 tests)
 - ✅ M5: Compiler tests (20 tests)
-- ⏳ M6: DAQ Engine tests (pending)
+- ✅ M6: DAQ Engine tests (18 tests)
 
 ## Debugging Failed Tests
 
