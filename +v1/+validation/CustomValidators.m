@@ -260,7 +260,13 @@ classdef CustomValidators
                         if isfield(pattern, 'elements')
                             pattern_elements = pattern.elements;  % Store in temp variable
                             for j = 1:length(pattern_elements)
-                                element = pattern_elements{j};  % Extract struct from cell array
+                                % Handle both cell arrays and struct arrays
+                                if iscell(pattern_elements)
+                                    element = pattern_elements{j};
+                                else
+                                    element = pattern_elements(j);
+                                end
+
                                 if isfield(element, 'symbol')
                                     if ~ismember(element.symbol, symbol_chars)
                                         errors{end+1} = v1.validation.ValidationError(...
