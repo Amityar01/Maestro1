@@ -101,6 +101,25 @@ Tests for Local-Global paradigm adapter:
 
 **Tests**: 21 test methods
 
+### TestCompiler
+Tests for SequenceFile compiler:
+- Element table → SequenceFile compilation
+- Audio buffer sizing and generation
+- TTL code injection at element onsets
+- TTL pulse duration (10 samples)
+- Audio generation for each element
+- Silence between elements (ITI)
+- Events table generation
+- Trial table and metadata preservation
+- Manifest with provenance (hash, timestamps)
+- Multi-element trials (Local-Global)
+- SHA-256 hash computation
+- Deterministic compilation (same input → same audio)
+- Edge cases (empty table, single element)
+- Integration with generators
+
+**Tests**: 20 test methods
+
 ## Running Tests
 
 ### Run All Tests
@@ -117,6 +136,7 @@ run_tests_v1('TestGenerators')
 run_tests_v1('TestPatternBuilder')
 run_tests_v1('TestOddballAdapter')
 run_tests_v1('TestLocalGlobalAdapter')
+run_tests_v1('TestCompiler')
 ```
 
 ### Run with Verbose Output
@@ -242,10 +262,11 @@ tests/v1/
 ├── TestGenerators.m                 (19 tests)
 ├── TestPatternBuilder.m             (18 tests)
 ├── TestOddballAdapter.m             (22 tests)
-└── TestLocalGlobalAdapter.m         (21 tests)
+├── TestLocalGlobalAdapter.m         (21 tests)
+└── TestCompiler.m                   (20 tests)
 ```
 
-Total: **146 unit tests**
+Total: **166 unit tests**
 
 ## Milestones
 
@@ -254,7 +275,7 @@ Total: **146 unit tests**
 - ✅ M2: Generator tests (19 tests)
 - ✅ M3: Pattern builder tests (18 tests)
 - ✅ M4: Paradigm adapter tests (43 tests)
-- ⏳ M5: Compiler tests (pending)
+- ✅ M5: Compiler tests (20 tests)
 - ⏳ M6: DAQ Engine tests (pending)
 
 ## Debugging Failed Tests
