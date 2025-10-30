@@ -12,12 +12,14 @@ fprintf('Symbols: ');
 disp(config.symbols);
 fprintf('Patterns: ');
 disp(config.patterns);
-fprintf('Pattern elements type: %s\n', class(config.patterns{1}.elements));
-fprintf('Pattern elements length: %d\n', length(config.patterns{1}.elements));
+% Store in temp variable to avoid comma-separated list expansion
+temp_elems = config.patterns{1}.elements;
+fprintf('Pattern elements type: %s\n', class(temp_elems));
+fprintf('Pattern elements length: %d\n', length(temp_elems));
 fprintf('First element: ');
-disp(config.patterns{1}.elements{1});
+disp(temp_elems{1});
 fprintf('Last element (should have symbol B): ');
-disp(config.patterns{1}.elements{4});
+disp(temp_elems{4});
 
 [valid, errors] = v1.validation.CustomValidators.validate_local_global_config(config);
 fprintf('Valid: %d\n', valid);

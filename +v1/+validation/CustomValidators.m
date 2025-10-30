@@ -261,13 +261,16 @@ classdef CustomValidators
                             continue;
                         end
 
+                        % Store elements in temp variable to avoid comma-separated list expansion
+                        pattern_elems = pattern.elements;
+
                         % Iterate through elements to validate symbol references
-                        for j = 1:length(pattern.elements)
+                        for j = 1:length(pattern_elems)
                             % Get the element - handle both cell and struct arrays
-                            if iscell(pattern.elements)
-                                elem = pattern.elements{j};
+                            if iscell(pattern_elems)
+                                elem = pattern_elems{j};
                             else
-                                elem = pattern.elements(j);
+                                elem = pattern_elems(j);
                             end
 
                             % Validate symbol reference
