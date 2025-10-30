@@ -51,7 +51,8 @@ classdef TestCompiler < matlab.unittest.TestCase
 
             % Setup RNG and sampling
             testCase.rng_manager = v1.sampling.RNGStreamManager(12345);
-            testCase.sampler = v1.sampling.NumericFieldSampler(testCase.rng_manager);
+            scope_manager = v1.sampling.ScopeManager();
+            testCase.sampler = v1.sampling.NumericFieldSampler(testCase.rng_manager, scope_manager);
             testCase.context = v1.generators.GeneratorContext('fs_hz', testCase.fs_hz, ...
                                                               'sampler', testCase.sampler);
             testCase.context.set_rng_manager(testCase.rng_manager);

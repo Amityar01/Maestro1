@@ -21,7 +21,8 @@ classdef TestIntegration < matlab.unittest.TestCase
             % Setup common infrastructure
             testCase.fs_hz = 48000;
             testCase.rng_manager = v1.sampling.RNGStreamManager(42);
-            testCase.sampler = v1.sampling.NumericFieldSampler(testCase.rng_manager);
+            scope_manager = v1.sampling.ScopeManager();
+            testCase.sampler = v1.sampling.NumericFieldSampler(testCase.rng_manager, scope_manager);
             testCase.context = v1.generators.GeneratorContext('fs_hz', testCase.fs_hz, ...
                                                               'sampler', testCase.sampler);
             testCase.context.set_rng_manager(testCase.rng_manager);
@@ -204,7 +205,8 @@ classdef TestIntegration < matlab.unittest.TestCase
 
             % Second run (reset RNG with same seed)
             testCase.rng_manager = v1.sampling.RNGStreamManager(42);
-            testCase.sampler = v1.sampling.NumericFieldSampler(testCase.rng_manager);
+            scope_manager2 = v1.sampling.ScopeManager();
+            testCase.sampler = v1.sampling.NumericFieldSampler(testCase.rng_manager, scope_manager2);
             testCase.context = v1.generators.GeneratorContext('fs_hz', testCase.fs_hz, ...
                                                               'sampler', testCase.sampler);
             testCase.context.set_rng_manager(testCase.rng_manager);

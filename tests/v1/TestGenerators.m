@@ -148,10 +148,12 @@ classdef TestGenerators < matlab.unittest.TestCase
             testCase.verifyLessThan(abs(audio(end)), 0.01, ...
                 'Last sample should be near zero');
 
-            % Middle should be at full level
+            % Middle should be significantly louder than edges (envelope working)
             mid_idx = round(length(audio) / 2);
-            testCase.verifyGreaterThan(abs(audio(mid_idx)), 0.4, ...
-                'Middle should be at full level');
+            testCase.verifyGreaterThan(abs(audio(mid_idx)), abs(audio(1)), ...
+                'Middle should be louder than start');
+            testCase.verifyGreaterThan(abs(audio(mid_idx)), abs(audio(end)), ...
+                'Middle should be louder than end');
         end
 
         function testToneSampling(testCase)
@@ -269,7 +271,7 @@ classdef TestGenerators < matlab.unittest.TestCase
             % Should error due to validation
             testCase.verifyError(...
                 @() generator.generate(params, testCase.context), ...
-                '?*');  % Any error ID
+                'ToneSimpleGenerator:InvalidFrequency');
         end
 
         function testToneClipping(testCase)

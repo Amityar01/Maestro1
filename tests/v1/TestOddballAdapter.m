@@ -179,8 +179,8 @@ classdef TestOddballAdapter < matlab.unittest.TestCase
             trial_plan = testCase.adapter.generate_trial_plan(config, 10);
 
             % Verify sequence matches
-            expected_labels = {'standard', 'standard', 'standard', 'standard', 'deviant', ...
-                              'standard', 'standard', 'standard', 'standard', 'deviant'};
+            expected_labels = {'standard'; 'standard'; 'standard'; 'standard'; 'deviant'; ...
+                              'standard'; 'standard'; 'standard'; 'standard'; 'deviant'};
             actual_labels = cellfun(@(t) t.label, trial_plan.trials, 'UniformOutput', false);
 
             testCase.verifyEqual(actual_labels, expected_labels, 'Should follow CSV sequence');
@@ -194,7 +194,7 @@ classdef TestOddballAdapter < matlab.unittest.TestCase
 
             trial_plan = testCase.adapter.generate_trial_plan(config, 5);
 
-            expected_labels = {'standard', 'standard', 'standard', 'standard', 'deviant'};
+            expected_labels = {'standard'; 'standard'; 'standard'; 'standard'; 'deviant'};
             actual_labels = cellfun(@(t) t.label, trial_plan.trials, 'UniformOutput', false);
 
             testCase.verifyEqual(actual_labels, expected_labels, 'Should use first N trials');
