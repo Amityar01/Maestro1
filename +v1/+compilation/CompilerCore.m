@@ -260,11 +260,9 @@ classdef CompilerCore < handle
             %   trial_table: Trial-level metadata table
 
             if isempty(element_table)
-                % Empty trial table
-                trial_table = table();
-                trial_table.trial_index = [];
-                trial_table.label = {};
-                trial_table.n_elements = [];
+                % Empty trial table with proper column structure
+                trial_table = table([], {}, [], ...
+                    'VariableNames', {'trial_index', 'label', 'n_elements'});
                 return;
             end
 

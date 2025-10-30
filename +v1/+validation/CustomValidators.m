@@ -258,8 +258,9 @@ classdef CustomValidators
                     for i = 1:length(lg_config.patterns)
                         pattern = lg_config.patterns{i};  % Extract struct from cell array
                         if isfield(pattern, 'elements')
-                            for j = 1:length(pattern.elements)
-                                element = pattern.elements{j};  % Extract struct from cell array
+                            pattern_elements = pattern.elements;  % Store in temp variable
+                            for j = 1:length(pattern_elements)
+                                element = pattern_elements{j};  % Extract struct from cell array
                                 if isfield(element, 'symbol')
                                     if ~ismember(element.symbol, symbol_chars)
                                         errors{end+1} = v1.validation.ValidationError(...
