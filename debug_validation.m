@@ -12,8 +12,8 @@ fprintf('Symbols: ');
 disp(config.symbols);
 fprintf('Patterns: ');
 disp(config.patterns);
-% Store in temp variable to avoid comma-separated list expansion
-temp_elems = config.patterns{1}.elements;
+% Use getfield to avoid comma-separated list expansion
+temp_elems = getfield(config.patterns{1}, 'elements');
 fprintf('Pattern elements type: %s\n', class(temp_elems));
 fprintf('Pattern elements length: %d\n', length(temp_elems));
 fprintf('First element: ');
