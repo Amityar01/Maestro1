@@ -261,8 +261,8 @@ classdef CustomValidators
                             continue;
                         end
 
-                        % Store elements in temp variable to avoid comma-separated list expansion
-                        pattern_elems = pattern.elements;
+                        % Use getfield to avoid comma-separated list expansion
+                        pattern_elems = getfield(pattern, 'elements');
 
                         % Iterate through elements to validate symbol references
                         for j = 1:length(pattern_elems)
