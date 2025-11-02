@@ -256,18 +256,31 @@ classdef CustomValidators
                     symbol_chars = cellfun(@(s) s.symbol, lg_config.symbols, 'UniformOutput', false);
 
                     for i = 1:length(lg_config.patterns)
-                        pattern = lg_config.patterns{i};
-                        if isfield(pattern, 'elements')
-                            for j = 1:length(pattern.elements)
-                                element = pattern.elements{j};
-                                if isfield(element, 'symbol')
-                                    if ~ismember(element.symbol, symbol_chars)
-                                        errors{end+1} = v1.validation.ValidationError(...
-                                            sprintf('patterns[%d].elements[%d].symbol', i-1, j-1), ...
-                                            'invalid_reference', ...
-                                            sprintf('Symbol "%s" not found in symbols array', element.symbol), ...
-                                            element.symbol);
-                                    end
+                        pattern = lg_config.patterns{i};  % Extract struct from cell array
+                        if ~isfield(pattern, 'elements')
+                            continue;
+                        end
+
+                        % Use getfield to avoid comma-separated list expansion
+                        pattern_elems = getfield(pattern, 'elements');
+
+                        % Iterate through elements to validate symbol references
+                        for j = 1:length(pattern_elems)
+                            % Get the element - handle both cell and struct arrays
+                            if iscell(pattern_elems)
+                                elem = pattern_elems{j};
+                            else
+                                elem = pattern_elems(j);
+                            end
+
+                            % Validate symbol reference
+                            if isfield(elem, 'symbol')
+                                if ~any(strcmp(elem.symbol, symbol_chars))
+                                    errors{end+1} = v1.validation.ValidationError(...
+                                        sprintf('patterns[%d].elements[%d].symbol', i-1, j-1), ...
+                                        'invalid_reference', ...
+                                        sprintf('Symbol "%s" not found in symbols array', elem.symbol), ...
+                                        elem.symbol);
                                 end
                             end
                         end
