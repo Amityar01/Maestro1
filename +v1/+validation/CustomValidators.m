@@ -261,8 +261,17 @@ classdef CustomValidators
                             continue;
                         end
 
-                        % Use getfield to avoid comma-separated list expansion
-                        pattern_elems = getfield(pattern, 'elements');
+                        % Use cell array wrapper to capture all elements without expansion
+                        pattern_elems_cell = {pattern.elements};  % Wrap to prevent comma-separated list expansion
+
+                        % Check if we got multiple elements (comma-separated list) or just one
+                        if length(pattern_elems_cell) > 1
+                            % Comma-separated list was expanded, wrap it back
+                            pattern_elems = pattern_elems_cell;
+                        else
+                            % Already a single cell array, unwrap it
+                            pattern_elems = pattern_elems_cell{1};
+                        end
 
                         % Iterate through elements to validate symbol references
                         for j = 1:length(pattern_elems)

@@ -12,8 +12,17 @@ fprintf('Symbols: ');
 disp(config.symbols);
 fprintf('Patterns: ');
 disp(config.patterns);
-% Use getfield to avoid comma-separated list expansion
-temp_elems = getfield(config.patterns{1}, 'elements');
+% Use cell array wrapper to capture all elements
+pattern = config.patterns{1};
+temp_elems_cell = {pattern.elements};
+fprintf('Captured %d items in cell wrapper\n', length(temp_elems_cell));
+
+if length(temp_elems_cell) > 1
+    temp_elems = temp_elems_cell;
+else
+    temp_elems = temp_elems_cell{1};
+end
+
 fprintf('Pattern elements type: %s\n', class(temp_elems));
 fprintf('Pattern elements length: %d\n', length(temp_elems));
 fprintf('First element: ');
