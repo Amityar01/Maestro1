@@ -237,8 +237,77 @@ classdef DAQEngine < handle
             %
             % Note: This requires NI-DAQ hardware and Data Acquisition Toolbox
 
-            error('DAQEngine:NotImplemented', ...
-                'Hardware playback requires NI-DAQ and Data Acquisition Toolbox. Use dry_run mode for testing.');
+            fprintf('Starting hardware playback...\n');
+
+            start_time = datetime('now');
+            obj.state = 'playing';
+
+            try
+                % Create DataAcquisition session (R2020a+ interface)
+                daq_obj = daq(obj.config.vendor);
+
+                % Add analog output channels
+                audio_channels = obj.config.audio_channels;
+                n_audio_ch = length(audio_channels);
+                for i = 1:n_audio_ch
+                    ch_name = sprintf('ao%d', audio_channels(i));
+                    addoutput(daq_obj, obj.config.device_id, ch_name, 'Voltage');
+                end
+
+                % Add digital output channel for TTL if specified
+                has_ttl = isfield(obj.config, 'ttl_channel') && ~isempty(obj.config.ttl_channel);
+                if has_ttl
+                    ttl_ch = obj.config.ttl_channel;
+                    addoutput(daq_obj, obj.config.device_id, ttl_ch, 'Digital');
+                end
+
+                % Set sample rate
+                daq_obj.Rate = obj.config.fs_hz;
+
+                % Prepare output data
+                audio_data = obj.seq_file.audio(:, 1:n_audio_ch);
+
+                if has_ttl
+                    % Convert TTL uint8 to logical
+                    ttl_data = logical(obj.seq_file.ttl);
+                    output_data = [audio_data, ttl_data];
+                else
+                    output_data = audio_data;
+                end
+
+                % Queue output data
+                preload(daq_obj, output_data);
+
+                fprintf('Queued %.3f s of audio on %d channels @ %d Hz\n', ...
+                    size(output_data, 1) / daq_obj.Rate, ...
+                    n_audio_ch, daq_obj.Rate);
+
+                % Start playback (blocking)
+                start(daq_obj, 'RepeatOutput');
+
+                % Wait for completion
+                wait(daq_obj);
+
+                end_time = datetime('now');
+
+                fprintf('Hardware playback complete.\n');
+
+            catch ME
+                obj.state = 'ready';
+                rethrow(ME);
+            end
+
+            % Build result
+            result = struct();
+            result.success = true;
+            result.start_time = start_time;
+            result.end_time = end_time;
+            result.duration_ms = milliseconds(end_time - start_time);
+            result.events_played = height(obj.seq_file.events);
+            result.events = obj.seq_file.events;
+            result.sequence_hash = obj.seq_file.manifest.audio_hash;
+
+            obj.state = 'completed';
         end
 
         function result = play_dry_run(obj)

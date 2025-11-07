@@ -59,25 +59,32 @@ if use_daq
 
     % Configure DAQ engine for hardware
     engine = v1.daq.DAQEngine();
-    engine.load(seq_file);
 
     % Configure for hardware playback
     % You'll need to customize this based on your DAQ device
     config = struct();
     config.mode = 'hardware';
+    config.vendor = 'ni';  % National Instruments
     config.device_id = devices(1).ID;  % Use first device
     config.fs_hz = fs_hz;
-    config.audio_channels = [0, 1];  % Analog output channels
+    config.audio_channels = [0, 1];  % Analog output channels ao0 and ao1
     config.ttl_channel = [];  % No TTL for now
 
     try
         engine.configure(config);
         fprintf('DAQ configured successfully!\n');
+
+        % Load the sequence file
+        engine.load_sequence(seq_file);
+        fprintf('Sequence loaded!\n');
+
+        % Play the audio
         fprintf('Playing through DAQ...\n');
         result = engine.play();
         fprintf('Playback complete!\n');
     catch ME
         fprintf('DAQ playback failed: %s\n', ME.message);
+        fprintf('Error details: %s\n', ME.identifier);
         fprintf('Trying MATLAB audio instead...\n');
         use_daq = false;
     end
