@@ -23,8 +23,14 @@ end
 fprintf('\n=== Generating Test Tone ===\n');
 fs_hz = 48000;
 
-% Create RNG manager
+% Create RNG manager and sampler
 rng_manager = v1.sampling.RNGStreamManager(42);
+scope_manager = v1.sampling.ScopeManager();
+sampler = v1.sampling.NumericFieldSampler(rng_manager, scope_manager);
+
+% Create generator context
+context = v1.generators.GeneratorContext('fs_hz', fs_hz, 'sampler', sampler);
+context.set_rng_manager(rng_manager);
 
 % Create stimulus library with a simple 1000 Hz tone (containers.Map)
 stimulus_library = containers.Map();
@@ -48,7 +54,6 @@ element_table.ttl_code = uint8(1);
 
 % Compile
 compiler = v1.compilation.CompilerCore();
-context = struct('rng_manager', rng_manager, 'iteration', 1);
 seq_file = compiler.compile(element_table, stimulus_library, fs_hz, context);
 
 fprintf('Generated %.2f seconds of audio\n', size(seq_file.audio, 1) / fs_hz);
