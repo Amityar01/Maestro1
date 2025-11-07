@@ -275,18 +275,12 @@ classdef DAQEngine < handle
                     output_data = audio_data;
                 end
 
-                % Queue output data
-                preload(daq_obj, output_data);
-
-                fprintf('Queued %.3f s of audio on %d channels @ %d Hz\n', ...
+                fprintf('Playing %.3f s of audio on %d channels @ %d Hz\n', ...
                     size(output_data, 1) / daq_obj.Rate, ...
                     n_audio_ch, daq_obj.Rate);
 
-                % Start playback (blocking)
-                start(daq_obj, 'RepeatOutput');
-
-                % Wait for completion
-                wait(daq_obj);
+                % Write output data (blocking/synchronous playback)
+                write(daq_obj, output_data);
 
                 end_time = datetime('now');
 
